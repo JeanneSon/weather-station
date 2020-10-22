@@ -21,8 +21,10 @@ public final class Sensor {
         return "ProductId: " + this.productId + ", VendorId: " + this.vendorId + ", Standort " + this.location;
     }
 
-    private double generateValue() {
-        return MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble();
+    private String generateValue() {
+        double value = MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble();
+        //improve cutter
+        return String.valueOf(value).substring(0, 4);
     }
 
     public static void main(String[] args) {
@@ -36,7 +38,9 @@ public final class Sensor {
         else {
             long until = System.currentTimeMillis() + timeInterval*20;
             while (System.currentTimeMillis() < until) {
-                server.sendMessage(sensor.generateValue() + "");
+                /*server.sendMessage(
+                    System.currentTimeMillis() + " milliseconds, " + sensor.generateValue() + "°C");*/
+                server.sendMessage(sensor.generateValue());
                 try {
                     Thread.sleep(timeInterval);
                 } catch (InterruptedException e) {
