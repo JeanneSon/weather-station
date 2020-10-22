@@ -26,7 +26,26 @@ public final class Sensor {
     }
 
     public static void main(String[] args) {
-
+        Sensor sensor = new Sensor(1, 1, "Saarbruecken");
+        TCPServer server = new TCPServer();
+        String timeIntervalString = server.awaitMessage();
+        long timeInterval = ConnectionManager.isLong(timeIntervalString);
+        if (timeInterval == -1) {
+            server.sendMessage("invalid time interval");
+        }
+        else {
+            long until = System.currentTimeMillis() + timeInterval*20;
+            while (System.currentTimeMillis() < until) {
+                server.sendMessage(sensor.generateValue() + "");
+                try {
+                    Thread.sleep(timeInterval);
+                } catch (InterruptedException e) {
+                    //TODO: handle exception
+                }
+            }
+        }
+        server.sendMessage("Hallo");
+        server.closer();
     }
 
     /**

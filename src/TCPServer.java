@@ -23,6 +23,7 @@ public class TCPServer {
     private static Socket connectionEndPoint;
     private static final int BUFFER_SIZE = 1024;
 
+    // create ServerSocket
     public TCPServer() {
         try {
             serviceAccessPoint = new ServerSocket(SERVER_PORT);
@@ -32,7 +33,7 @@ public class TCPServer {
         }
     }
 
-    public static void sendMessage(String message) {
+    public void sendMessage(String message) {
         try {
             // Construct a packet for sending the response
             String responseMessage = message;
@@ -44,16 +45,14 @@ public class TCPServer {
             System.out.println("Server sending response: " + responseMessage);
             connectionEndPointOut.write(responsePDU);
 
-            // 5. release the connection - close the client socket
-            //TCP_DISCONNECT_REQUEST
-            connectionEndPoint.close();
+            
 
         } catch (IOException ex) {
             Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public static String awaitMessage() {
+    public String awaitMessage() {
 
         try {
             // 1. create a server socket, bound to the server port.
@@ -84,8 +83,7 @@ public class TCPServer {
             String requestMessage = new String(requestPDU).trim();
             System.out.println("Server received request: " + requestMessage);
 
-            // 6. close the server socket
-            serviceAccessPoint.close();
+            
 
             return requestMessage;
         } catch (IOException ex) {
@@ -94,6 +92,20 @@ public class TCPServer {
 
         return null;
 
+    }
+
+    public void closer() {
+        try {
+            // 5. release the connection - close the client socket
+            //TCP_DISCONNECT_REQUEST
+            connectionEndPoint.close();
+
+            // 6. close the server socket
+            serviceAccessPoint.close();
+        }
+        catch (IOException ex) {
+            //
+        }
     }
 
 }

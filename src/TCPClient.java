@@ -30,7 +30,7 @@ public class TCPClient {
         serviceAccessPoint = new Socket();
     }
 
-    public static void sendMessage(String message) {
+    public void sendMessage(String requestMessage) {
         try {
             //phase : CONNECTION ESTABLISHMENT
 
@@ -46,7 +46,6 @@ public class TCPClient {
 
             //phase : DATA TRANSFER
             // 2. Construct a packet for sending a request
-            String requestMessage = "QUESTION";
             // serialize data / encoding
             byte[] requestPDU = requestMessage.getBytes();
 
@@ -56,16 +55,14 @@ public class TCPClient {
             //use TCP DATA service: TCP_DATA_REQ(requestPDU)
             connectionEndPointOut.write(requestPDU);
 
-            // 6. release connection - close socket
-            //TCP_DISCONNECT_REQ
-            serviceAccessPoint.close();
+            
         } catch (IOException ex) {
             System.out.println("TCP: Connect response failed - no connection");
         }
 
     }
 
-    public static String awaitMessage() {
+    public String awaitMessage() {
         try {
 
             // 4. Wait for response
@@ -109,5 +106,15 @@ public class TCPClient {
         }
 
         return null;
+    }
+
+    public void closer() {
+        try {
+            // 6. release connection - close socket
+            //TCP_DISCONNECT_REQ
+            serviceAccessPoint.close();
+        } catch (IOException e) {
+            //TODO: handle exception
+        }
     }
 }
