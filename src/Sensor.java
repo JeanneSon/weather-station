@@ -1,13 +1,16 @@
-
+import java.util.Random;
 public final class Sensor {
-
+    private static final Random random = new Random();
     
+// setter für Standort
+
+    // oder überall static weglassen; singleton
     private static Sensor sensor = new Sensor(1, 1, "Saarbruecken");
     private static TCPServer server = new TCPServer();
 
     // attributes are final as they can only be set once when the Sensor is instanciated
-    private final int productId;
-    private final int vendorId;
+    private final static int productId = 5;
+    private final static int vendorId = 3;
     private final String location;
     private static final double MAX_TEMP = 50.0;
     private static final double MIN_TEMP = -20.0;
@@ -25,13 +28,19 @@ public final class Sensor {
         return "ProductId: " + this.productId + ", VendorId: " + this.vendorId + ", Standort " + this.location;
     }
 
+    //remove ImportManager
     private String generateTemp() {
         double value = MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble();
         //improve cutter
         return String.valueOf(value).substring(0, 4);
     }
-
+//sensor -> sensorapplikation
+//main will standort -> scanner.next -> thread startet kommunikation -> while schleife, die auf stop wartet
     public static void main(String[] args) {
+        //standort angeben 
+        //user beendet sensor durch x
+        //siehe printing .
+        //im Thread TCP-kommunikation (Temperaturübermittlung + info, data, stop)
         String timeIntervalString = server.awaitMessage();
         long timeInterval = ConnectionManager.isLong(timeIntervalString);
         if (timeInterval == -1) {
