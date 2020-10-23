@@ -1,6 +1,10 @@
 
 public final class Sensor {
 
+    
+    private static Sensor sensor = new Sensor(1, 1, "Saarbruecken");
+    private static TCPServer server = new TCPServer();
+
     // attributes are final as they can only be set once when the Sensor is instanciated
     private final int productId;
     private final int vendorId;
@@ -21,15 +25,13 @@ public final class Sensor {
         return "ProductId: " + this.productId + ", VendorId: " + this.vendorId + ", Standort " + this.location;
     }
 
-    private String generateValue() {
+    private String generateTemp() {
         double value = MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble();
         //improve cutter
         return String.valueOf(value).substring(0, 4);
     }
 
     public static void main(String[] args) {
-        Sensor sensor = new Sensor(1, 1, "Saarbruecken");
-        TCPServer server = new TCPServer();
         String timeIntervalString = server.awaitMessage();
         long timeInterval = ConnectionManager.isLong(timeIntervalString);
         if (timeInterval == -1) {
@@ -39,8 +41,8 @@ public final class Sensor {
             long until = System.currentTimeMillis() + timeInterval*20;
             while (System.currentTimeMillis() < until) {
                 /*server.sendMessage(
-                    System.currentTimeMillis() + " milliseconds, " + sensor.generateValue() + "°C");*/
-                server.sendMessage(sensor.generateValue());
+                    System.currentTimeMillis() + " milliseconds, " + sensor.generateTemp() + "°C");*/
+                server.sendMessage(sensor.generateTemp());
                 try {
                     Thread.sleep(timeInterval);
                 } catch (InterruptedException e) {

@@ -1,6 +1,9 @@
 
 
 public class WeatherStation {
+    
+    private static final WeatherStation station = new WeatherStation();
+    private static final TCPClient client = new TCPClient();
 
     private double minTemp;
     private double maxTemp;
@@ -8,13 +11,10 @@ public class WeatherStation {
     private boolean measuredOneValid;
 
     public WeatherStation() {
-        minTemp =  50.0;
-        maxTemp = -20.0;
-        currentValue = Double.NaN;
-        measuredOneValid = false;
+        reset();
     }
 
-    public void reset() {
+    private void reset() {
         minTemp =  50.0;
         maxTemp = -20.0;
         currentValue = Double.NaN;
@@ -29,8 +29,6 @@ public class WeatherStation {
     }
 
     public static void main(String[] args) {
-        WeatherStation station = new WeatherStation();
-        TCPClient client = new TCPClient();
         // request temperature, interval in milliseconds
         client.sendMessage("3000");
         String currentValueAsString = client.awaitMessage();
