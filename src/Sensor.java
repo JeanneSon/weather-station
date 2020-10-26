@@ -1,6 +1,3 @@
-
-import com.sun.nio.sctp.SendFailedNotification;
-
 public final class Sensor {
 
     // attributes are final as they can only be set once when the Sensor is instanciated

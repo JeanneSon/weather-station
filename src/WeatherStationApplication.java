@@ -33,7 +33,7 @@ public class WeatherStationApplication {
 
         AwaitMessageRunnable amr = new AwaitMessageRunnable();
         Thread awaitMessageThread = new Thread(amr);
-
+        //verify first that connection is established
         System.out.println("WEATHERSTATIONAPPLICATION:");
         System.out.println("- Type \"" + START_STATION_COMMAND + "\" to start the weatherstation");
         System.out.println("- Type \"" + STOP_STATION_COMMAND + "\" to stop the weatherstation");

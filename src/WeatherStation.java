@@ -1,6 +1,4 @@
-
-import java.util.Scanner;
-
+//junit for WeatherStation, test concept
 public class WeatherStation {
 
     private double minTemp;

@@ -24,9 +24,11 @@ public class SensorApplication {
     private static Sensor sensor;
     private static TCPServer server;
 
+    //order of displaying menu
     public static void main(String[] args) {
 
         server = new TCPServer();
+        server.awaitConnection();
 
         DataSenderRunnable dsr = new DataSenderRunnable();
         Thread dataSenderThread = new Thread(dsr);
@@ -46,14 +48,16 @@ public class SensorApplication {
             input = sc.nextLine();
 
             if (input.matches(START_SENSOR_COMMAND_REGEX)) {
-                System.out.println("START SENSOR");
                 String location = input.split(" ", 2)[1];
+                System.out.println("starting a Sensor " + location);
                 sensor = new Sensor(1, 1, location);
 
                 //server.sendMessage(input);
             } else if (input.equals(STOP_SENSOR_COMMAND)) {
                 System.out.println("STOP SENSOR");
 
+            } else {
+                System.out.println("Invalid input!");
             }
         }
     }

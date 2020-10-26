@@ -16,6 +16,10 @@ import java.util.logging.Logger;
  *
  * @author j
  */
+
+//extract code snippets they have in common
+
+
 public class TCPServer {
 
     public static ServerSocket serviceAccessPoint;
@@ -49,9 +53,9 @@ public class TCPServer {
         }
     }
 
-    public String awaitMessage() {
-
+    public void awaitConnection() {
         try {
+            
             // 1. create a server socket, bound to the server port.
             System.out.println("Server running on port "
                     + serviceAccessPoint.getLocalPort());
@@ -66,6 +70,14 @@ public class TCPServer {
                     + connectionEndPoint.getInetAddress().getHostAddress()
                     + ":" + connectionEndPoint.getPort());
 
+        } catch (IOException e) {
+            //TODO: handle exception
+        }
+    }
+
+    public String awaitMessage() {
+
+        try {
             // 3. receive a message on this client socket.
             byte[] requestPDU = new byte[BUFFER_SIZE];
             InputStream connectionEndPointIn = connectionEndPoint.getInputStream();
