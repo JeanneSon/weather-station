@@ -1,0 +1,136 @@
+\documentclass[a4paper]{report}
+\usepackage[ngerman]{babel}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Uppsala University Assignment Title Page 
+% LaTeX Template
+% Version 1.0 (27/12/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% WikiBooks (http://en.wikibooks.org/wiki/LaTeX/Title_Creation)
+% Modified by Elsa Slattegard to fit Uppsala university
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+
+%\title{Title page with logo}
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\begin{document}
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\center % Center everything on the page
+ 
+%----------------------------------------------------------------------------------------
+%	HEADING SECTIONS
+%----------------------------------------------------------------------------------------
+
+%\textsc{\LARGE ISFATES - DFHI}\\[1.5cm] % Name of your university/college
+\includegraphics[scale=.6]{2844169_mxtuSNlblctu_0.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
+\textsc{\Large Informatique et ingénierie du web (L3)}\\[0.5cm] % Major heading such as course name
+\textsc{\large Perfectionnement en Java}\\[0.5cm] % Minor heading such as course title
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Wetterstation}\\[0.4cm] % Title of your document
+\HRule \\[1.5cm]
+ 
+%----------------------------------------------------------------------------------------
+%	AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+%\emph{Author:}\\
+Julian \textsc{Krug}\\ % Your name
+Hanna \textsc{Schall}\\ % Your name
+\end{flushleft}
+
+\end{minipage}\\[2cm]
+
+% If you don't want a supervisor, uncomment the two lines below and remove the section above
+%\Large \emph{Author:}\\
+%John \textsc{Smith}\\[3cm] % Your name
+
+%----------------------------------------------------------------------------------------
+%	DATE SECTION
+%----------------------------------------------------------------------------------------
+
+{\large Oktober 2020}\\[2cm] % Date, change the \today to a set date if you want to be precise
+
+\vfill % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
+
+\chapter{Projektbeschreibung}
+\chapter{Anforderungsanalyse}
+Im Folgenden werden die Anforderungen an das Projekt analysiert.
+
+\section{Funktionale Anforderungen (functional requirements)}
+Die funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstation} und \textit{Sensor}.
+\subsection{Sensor}
+\begin{description}
+    \item[FR1] Der Sensor bietet einen Info-Dienst, der das Senden von ProductId, VendorId und Standort beinhaltet, an.
+    \item[FR2] Der Sensor bietet einen Data-Dienst, der periodisch Zeit und aktuelle Temperatur an die Wetterstation schickt, an.
+    \item[FR3] Die Zeitangabe gibt Datum und exakte Uhrzeit (inklusive Sekunden) an.
+    \item[FR3] Der Benutzer kann den Data-Dienst aktivieren und die Messfrequenz angeben.
+    \item[FR4] Eine Messfrequenz wird in Sekunden angegeben und kann zwischen 1 und 120 Sekunden liegen.  
+    \item[FR5] Der Sensor bietet einen Stop-Dienst, der das periodische Senden beendet, an.
+    \item[FR6] Der Admin muss den Sensor über die Konsole starten.
+    \item[FR7] Der Admin muss den Standort des Sensors über die Konsole eingeben.  
+    \item[FR8] Wetterstation und Sensor können miteinander kommunizieren (Datenaustausch).  
+\end{description}
+
+\subsection{Wetterstation}
+\begin{description}
+    \item[FR9] Der Admin kann die Wetterstation über die Konsole starten.
+    \item[FR10] Die Wetterstation hat eine MinMax-Funktion, die das Minimum und das Maximum der Temperatur eines Zeitraums angibt.
+    \item[FR11] Der Zeitraum ist begrenzt durch den Start des Programms oder Reset von Minimum und Maximum und dem aktuellen Zeitpunkt.
+    \item[FR12] Der Benutzer kann die MinMax-Funktion der Wetterstation benutzen.
+    \item[FR13] Der Benutzer kann das Minimum und Maximum zurücksetzten (Reset). 
+\end{description}
+
+
+\section{Nicht-Funktionale Anforderungen (non-functional requirements)}
+Die nicht-funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstation}, \textit{Sensor} und \textit{Administrativ}.
+\subsection{Sensor}
+\begin{description}
+    \item[NFR1] Der Sensor muss eine ProductId, eine VendorId und einen Standort haben.
+    \item[NFR2] Der Sensor kann im Bereich -20 bis 50°C  messen.
+    \item[NFR3] Der Sensor muss durch Unit-Tests getestet werden.
+\end{description}
+
+\subsection{Wetterstation}
+\begin{description}
+    \item[NFR4] Die Wetterstation kommuniziert mit dem Sensor über TCP.
+    \item[NFR5] Die Wetterstation kann sich mit genau einem Sensor verbinden.
+    \item[NFR6] Der Sensor muss durch Unit-Tests getestet werden.
+\end{description}
+
+\subsection{Administrativ}
+\begin{description}
+    \item[NFR7] Es muss ein UML-Klassendiagramm erstellt werden.
+    \item[NFR8] Es muss eine Projektbeschreibung verfasst werden.
+    \item[NFR9] Die Abgabefrist des Projekts ist am 02.11.2020 um 6 Uhr.
+    \item[NFR10] Die Programmiersprache ist Java.
+    \item[NFR11] Das Programm muss auf einem durchschnittlichen PC (mind. 1 GB RAM) lauffähig sein. 
+\end{description}
+\end{document}
