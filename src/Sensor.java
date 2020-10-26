@@ -1,16 +1,11 @@
-import java.util.Random;
-public final class Sensor {
-    private static final Random random = new Random();
-    
-// setter für Standort
 
-    // oder überall static weglassen; singleton
-    private static Sensor sensor = new Sensor(1, 1, "Saarbruecken");
-    private static TCPServer server = new TCPServer();
+import com.sun.nio.sctp.SendFailedNotification;
+
+public final class Sensor {
 
     // attributes are final as they can only be set once when the Sensor is instanciated
-    private final static int productId = 5;
-    private final static int vendorId = 3;
+    private final int productId;
+    private final int vendorId;
     private final String location;
     private static final double MAX_TEMP = 50.0;
     private static final double MIN_TEMP = -20.0;
@@ -28,43 +23,10 @@ public final class Sensor {
         return "ProductId: " + this.productId + ", VendorId: " + this.vendorId + ", Standort " + this.location;
     }
 
-    //remove ImportManager
-    private String generateTemp() {
-        double value = MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble();
+    public String getCurrentTemp() {
+        double value = ConnectionManager.round(MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble(), 2);
         //improve cutter
-        return String.valueOf(value).substring(0, 4);
-    }
-//sensor -> sensorapplikation
-//main will standort -> scanner.next -> thread startet kommunikation -> while schleife, die auf stop wartet
-    public static void main(String[] args) {
-        //standort angeben 
-        //user beendet sensor durch x
-        //siehe printing .
-        //im Thread TCP-kommunikation (Temperaturübermittlung + info, data, stop)
-        String timeIntervalString = server.awaitMessage();
-        long timeInterval = ConnectionManager.isLong(timeIntervalString);
-        if (timeInterval == -1) {
-            server.sendMessage("invalid time interval");
-        }
-        else {
-            long until = System.currentTimeMillis() + timeInterval*20;
-            while (System.currentTimeMillis() < until) {
-                /*server.sendMessage(
-                    System.currentTimeMillis() + " milliseconds, " + sensor.generateTemp() + "°C");*/
-                server.sendMessage(sensor.generateTemp());
-                try {
-                    Thread.sleep(timeInterval);
-                } catch (InterruptedException e) {
-                    //TODO: handle exception
-                }
-            }
-        }
-        server.sendMessage("Hallo");
-        server.closer();
+        return String.valueOf(value + ":" + System.currentTimeMillis());
     }
 
-    /**
-     * start application init Sensor init Station link Sensor with Station
-     *
-     */
 }

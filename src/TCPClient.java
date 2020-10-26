@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -27,7 +29,12 @@ public class TCPClient {
     private static Socket serviceAccessPoint;
 
     public TCPClient() {
-        serviceAccessPoint = new Socket();
+        try {
+            serviceAccessPoint = new Socket();
+            serviceAccessPoint.connect(new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID), WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT);
+        } catch (IOException ex) {
+            System.out.println("TCP: Connect response failed - no connection");
+        }
     }
 
     public void sendMessage(String requestMessage) {
@@ -41,9 +48,7 @@ public class TCPClient {
             //use TCP Service : set timer for connection establishment
             //TCP_TIMEOUT_REQ(timeout)
             //TCP_CONNECT_REQ(Peer-SAP address, quality of service)
-            serviceAccessPoint.connect(new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID), WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT);
             //TCP_CONNECT_CONFIRM(ok)
-
             //phase : DATA TRANSFER
             // 2. Construct a packet for sending a request
             // serialize data / encoding
@@ -55,9 +60,8 @@ public class TCPClient {
             //use TCP DATA service: TCP_DATA_REQ(requestPDU)
             connectionEndPointOut.write(requestPDU);
 
-            
         } catch (IOException ex) {
-            System.out.println("TCP: Connect response failed - no connection");
+            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -67,33 +71,23 @@ public class TCPClient {
 
             // 4. Wait for response
             // build response buffer
-            byte[] responsePDU = new byte[BUFFER_SIZE];
-
-            boolean timeout = false;
             try {
                 //use TCP service: TCP_TIMEOUT_REQUEST(timeout)
                 serviceAccessPoint.setSoTimeout(WAIT_FOR_MESSAGE_TIME_MILLI_SEC);
                 InputStream connectionEndPointIn = serviceAccessPoint.getInputStream();
-                //use TCP DATA service: TCP_DATA_CNF(responsePDU)
+                //use TCP DATA service: TCP_DATA_CNF(responsePDU)  
+                byte[] responsePDU = new byte[BUFFER_SIZE];
                 int bytesRead = connectionEndPointIn.read(responsePDU);
                 //if (bytesRead == -1) { System.out.println("Timeout Workaround"); timeout = true; }
                 System.out.println("bytes read: " + bytesRead);
-            } catch (SocketTimeoutException e) {
-                //TCP_ABORT_INDICATION(timeout)
-                timeout = true;
-            }
 
-            // 5. process response or timeout
-            if (!timeout) {
-                // process response
-                // deserialize response / decoding
                 String responseMessage = new String(responsePDU).trim();
                 System.out.println("Client received response: "
                         + responseMessage);
 
                 return responseMessage;
+            } catch (SocketTimeoutException e) {
 
-            } else {
                 System.out.println("Timeout action!");
             }
 

@@ -33,10 +33,9 @@ public class TCPServer {
         }
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(String responseMessage) {
         try {
-            // Construct a packet for sending the response
-            String responseMessage = message;
+
             // serialize data
             byte[] responsePDU = responseMessage.getBytes();
 
@@ -44,8 +43,6 @@ public class TCPServer {
             //Use TCP DATA service: TCP_DATA.response(responsePDU)
             System.out.println("Server sending response: " + responseMessage);
             connectionEndPointOut.write(responsePDU);
-
-            
 
         } catch (IOException ex) {
             Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -83,8 +80,6 @@ public class TCPServer {
             String requestMessage = new String(requestPDU).trim();
             System.out.println("Server received request: " + requestMessage);
 
-            
-
             return requestMessage;
         } catch (IOException ex) {
             Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,8 +97,7 @@ public class TCPServer {
 
             // 6. close the server socket
             serviceAccessPoint.close();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             //
         }
     }
