@@ -30,9 +30,9 @@ class WSTest {
 	WeatherStation ws;
 
 	@Test
-	void testGetCurrentTemp() {
+	void testGetCurrentTemp0() {
 		ws.setCurrentTemp(0.0, 3000);
-		assertEquals(ws.getCurrentTemp(), 0.0);
+		assertEquals(0.0, ws.getCurrentTemp());
 
 	}
 

@@ -1,11 +1,7 @@
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -28,77 +24,38 @@ public class TCPServer {
     private static final int BUFFER_SIZE = 1024;
 
     // create ServerSocket
-    public TCPServer() {
+    public TCPServer() throws TCPPort.TCPException {
+        // 1. create a server socket, bound to the server port.
         try {
             serviceAccessPoint = new ServerSocket(SERVER_PORT);
 
         } catch (IOException ex) {
-            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
+            throw new TCPPort.TCPException("starting server failed");
         }
     }
 
-    public void sendMessage(String responseMessage) {
-        try {
-
-            // serialize data
-            byte[] responsePDU = responseMessage.getBytes();
-
-            OutputStream connectionEndPointOut = connectionEndPoint.getOutputStream();
-            //Use TCP DATA service: TCP_DATA.response(responsePDU)
-            //System.out.println("Server sending response: " + responseMessage);
-            connectionEndPointOut.write(responsePDU);
-
-        } catch (IOException ex) {
-            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public void sendMessage(String responseMessage) throws TCPPort.TCPException {
+        TCPPort.sendMessage(TCPServer.connectionEndPoint, responseMessage);
     }
 
-    public void awaitConnection() {
+    public String awaitConnection() throws TCPPort.TCPException {
         try {
-            
-            // 1. create a server socket, bound to the server port.
-            System.out.println("Server running on port "
-                    + serviceAccessPoint.getLocalPort());
+            String toReturn = "Server running on port " + serviceAccessPoint.getLocalPort();
 
-            // 2. Listen for a connection to be made to this socket and accept
-            // it.
+            // 2. Listen for a connection to be made to this socket and accept it
             //wait for connection request
-            //TCP_CONNECT_IND
             connectionEndPoint = serviceAccessPoint.accept();
-
-            System.out.println("connection establishment with "
+            return toReturn + "\nconnection establishment with "
                     + connectionEndPoint.getInetAddress().getHostAddress()
-                    + ":" + connectionEndPoint.getPort());
+                    + ":" + connectionEndPoint.getPort();
 
         } catch (IOException e) {
-            //TODO: handle exception
+            throw new TCPPort.TCPException("waiting failed");
         }
     }
 
-    public String awaitMessage() {
-
-        try {
-            // 3. receive a message on this client socket.
-            byte[] requestPDU = new byte[BUFFER_SIZE];
-            InputStream connectionEndPointIn = connectionEndPoint.getInputStream();
-
-            //Use TCP DATA service: TCP_DATA.indication(requestPDU)
-            int bytesRead = connectionEndPointIn.read(requestPDU);
-            if (bytesRead >= BUFFER_SIZE) {
-                System.err.println("buffer to small");
-            }
-            // 4. process request
-            // deserialize request
-            String requestMessage = new String(requestPDU).trim();
-            //System.out.println("Server received request: " + requestMessage);
-
-            return requestMessage;
-        } catch (IOException ex) {
-            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return null;
-
+    public String awaitMessage() throws TCPPort.TCPException {
+        return TCPPort.awaitMessage(TCPServer.connectionEndPoint, BUFFER_SIZE);
     }
 
     public void closer() {

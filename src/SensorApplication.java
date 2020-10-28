@@ -26,7 +26,6 @@ public class SensorApplication {
 
     private static boolean sensorRunning;
 
-    //order of displaying menu
     public static void main(String[] args) {
 
         DataSenderRunnable dsr = new DataSenderRunnable();
@@ -48,10 +47,15 @@ public class SensorApplication {
                 String location = input.split(" ", 2)[1];
                 System.out.println("starting a Sensor " + location);
                 sensor = new Sensor(1, 1, location);
-                server = new TCPServer();
-                server.awaitConnection();
-                dataSenderThread.start();
-                awaitMessageThread.start();
+                System.out.println("waiting for a weather station to connect...");
+                try {
+                    server = new TCPServer();
+                    server.awaitConnection();
+                    dataSenderThread.start();
+                    awaitMessageThread.start();
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
+                }
 
                 //server.sendMessage(input);
             } else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
@@ -82,18 +86,22 @@ public class SensorApplication {
 
             while (true) {
                 if (running) {
-                    String message = server.awaitMessage();
-
-                    if (message.equals(INFO_COMMAND)) {
-                        server.sendMessage(sensor.info());
-
-                    } else if (message.matches(DATA_COMMAND_REGEX)) {
-                        dsr.running = true;
-                        dsr.delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
-
-                        // }   else if (message.equals("STOP")) {
-                        //    dsr.running = false;
+                    try {
+                        String message = server.awaitMessage();
+                        if (message.equals(INFO_COMMAND)) {
+                            server.sendMessage(sensor.info());
+    
+                        } else if (message.matches(DATA_COMMAND_REGEX)) {
+                            dsr.running = true;
+                            dsr.delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
+    
+                            // }   else if (message.equals("STOP")) {
+                            //    dsr.running = false;
+                        }
+                    } catch (TCPPort.TCPException e) {
+                        System.out.println(e.getMessage());
                     }
+
                 }
             }
         }
@@ -109,13 +117,17 @@ public class SensorApplication {
             while (true) {
                 if (running) {
 
-                    server.sendMessage(sensor.getCurrentTemp());
-
                     try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException e) {
-                        System.out.println(e);
+                        server.sendMessage(sensor.getCurrentTemp());
+                        try {
+                            Thread.sleep(delay);
+                        } catch (InterruptedException e) {
+                            System.out.println(e);
+                        }
+                    } catch (TCPPort.TCPException e) {
+                        System.out.println(e.getMessage());
                     }
+
                 }
             }
         }

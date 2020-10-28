@@ -53,11 +53,10 @@ public class GeneralManager {
     }
 
     public static String timeInMillisToDate(long timeInMillis) {
-        long millis = timeInMillis % 1000;
         long second = (timeInMillis / 1000) % 60;
         long minute = (timeInMillis / (1000 * 60)) % 60;
         long hour = (timeInMillis / (1000 * 60 * 60)) % 24;
 
-        return String.format("%02d:%02d:%02d.%d", hour, minute, second, millis);
+        return String.format("%02d:%02d:%02d", hour, minute, second);
     }
 }

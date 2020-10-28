@@ -23,7 +23,7 @@ public class WeatherStationApplication {
     private static final String MIN_MAX_RESET_COMMAND = "MM RESET";
     private static final String EXIT_DIALOG_COMMAND = "EXIT";
 
-    private static WeatherStation weatherStation;
+    private static WeatherStation weatherStation;               
     private static TCPClient tcpClient;
 
     private static boolean weatherStationRunning;
@@ -44,10 +44,14 @@ public class WeatherStationApplication {
             input = sc.nextLine();
 
             if (input.equals(START_STATION_COMMAND) && !weatherStationRunning) {
-                weatherStation = new WeatherStation();
-                tcpClient = new TCPClient();
-                awaitMessageThread.start();
-                amr.running = true;
+                try {
+                    tcpClient = new TCPClient();
+                    weatherStation = new WeatherStation();
+                    awaitMessageThread.start();
+                    amr.running = true;
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
+                }
 
             } else if (input.equals(STOP_STATION_COMMAND) && weatherStationRunning) {
                 weatherStation = null;
@@ -64,7 +68,11 @@ public class WeatherStationApplication {
             } else if ((input.equals(INFO_COMMAND) || input.matches(DATA_COMMAND_REGEX))
                     && weatherStationRunning) {
                 System.out.println("sending...");
-                tcpClient.sendMessage(input);
+                try {
+                    tcpClient.sendMessage(input);
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
+                }
 
             } else {
                 System.out.println("Invalid input!");
@@ -72,13 +80,20 @@ public class WeatherStationApplication {
         }
     }
 
+    // fix menu
+    // data-stop
+    // use closer
+
     static void printMenu() {
         System.out.println("\n\n\n\n\n\n\n\n");
         System.out.println("WEATHERSTATIONAPPLICATION:");
         System.out.println("WEATHERSTATION:");
-        if (weatherStationRunning) {
-            System.out.println("Most recent transmitted temp: " + weatherStation.getCurrentTemp() + "°C at " + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()));
-            System.out.println("Min and Max since last reset: Min: " + weatherStation.getMinTemp() + "°C / Max: " + weatherStation.getMaxTemp() + "°C");
+        if (weatherStationRunning && weatherStation.getMeasuredOneValid()) {
+            System.out.println("Most recent transmitted temp: \n\t" + weatherStation.getCurrentTemp() + 
+                                "°C at " + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()));
+            System.out.println(weatherStation.minMaxInfo());
+        } else { 
+            System.out.println("No valid value measured until now.");
         }
         System.out.println("_______________________________________________");
         System.out.println("MENU:");
@@ -89,6 +104,7 @@ public class WeatherStationApplication {
             System.out.println("- Type \"" + STOP_STATION_COMMAND + "\" to stop the weatherstation");
             System.out.println("- Type \"" + INFO_COMMAND + "\" for sensor information");
             System.out.println("- Type \"" + DATA_COMMAND + " <interval in s>\" for periodic sensor data");
+            //DATA_STOP
             System.out.println("- Type \"" + MIN_MAX_COMMAND + "\" to get lowest and highest messured temperature");
             System.out.println("- Type \"" + MIN_MAX_RESET_COMMAND + "\" to reset lowest and highest messured temperature");
         }
@@ -108,19 +124,26 @@ public class WeatherStationApplication {
 
             while (true) {
                 if (running) {
-                    String message = tcpClient.awaitMessage();
-                    if (message != null) {//muss weg
+                    String message = null;
+                    try {
+                        message = tcpClient.awaitMessage();
+                    } catch (TCPPort.TCPException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    if (message != null && weatherStation != null) {//muss weg
                         //System.out.println("Received: " + message);
                         if (GeneralManager.isDoubleAndLong(message)) {
                             weatherStation.setCurrentTemp(Double.parseDouble(message.split(":")[0]), Long.parseLong(message.split(":")[1]));
                             //System.out.println(weatherStation.minMaxInfo());
                             printMenu();
                         }
-                        try {
-                            Thread.sleep(delay);
-                        } catch (InterruptedException e) {
-                            System.out.println(e);
+                        else {
+                            System.out.println(message);
                         }
+                    } try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        System.out.println(e);
                     }
 
                 }

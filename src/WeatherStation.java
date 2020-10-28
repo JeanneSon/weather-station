@@ -11,6 +11,10 @@ public class WeatherStation {
     public WeatherStation() {
         reset();
     }
+    
+    public boolean getMeasuredOneValid() {
+        return measuredOneValid;
+    }
 
     public void setCurrentTemp(double currentTemp, long currentTempTime) {
         //check if valid (maybe)
@@ -23,6 +27,7 @@ public class WeatherStation {
     public double getCurrentTemp() {
         return currentTemp;
     }
+
 
     public long getCurrentTempTime() {
         return currentTempTime;
@@ -56,7 +61,7 @@ public class WeatherStation {
 
     public String minMaxInfo() {
         if (measuredOneValid) {
-            return "Minimum: " + minTemp + "  Maximum: " + maxTemp;
+            return "Since last reset / start of station\n\tMinimum: " + minTemp + "  Maximum: " + maxTemp;
         } else {
             return "No valid value measured until now.";
         }
