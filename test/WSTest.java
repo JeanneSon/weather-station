@@ -25,9 +25,10 @@ class WSTest {
 
 	@AfterEach
 	void tearDown() throws Exception {
+		ws = null;
 	}
 
-	WeatherStation ws;
+	private WeatherStation ws;
 
 	@Test
 	void testGetCurrentTemp0() {
@@ -44,6 +45,11 @@ class WSTest {
 		assertEquals(arg, ws.getCurrentTemp());
 	}
 
+//verify : reset -> exception for temp request on->set->reset->getTemp
+//funktional requirement : wetterstation kann alle temperaturen darstellen
+
+	//für jede Folge eigene Testfkt über Array
+	//oder Testdaten in Array von arrays auslagern [erwartet im INdex 0]
 	@ParameterizedTest
 	@ValueSource(doubles = { 1.0, 2.0, 3.0 })
 	void testGetMinTemp(double arg) {

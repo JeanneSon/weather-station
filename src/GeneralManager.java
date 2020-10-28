@@ -4,8 +4,6 @@ import java.math.RoundingMode;
 
 public class GeneralManager {
 
-    public static final int SERVER_PORT = 10001;
-
     private GeneralManager() {
     }
 

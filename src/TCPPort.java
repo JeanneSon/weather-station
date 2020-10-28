@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 public class TCPPort {
+    //improve - tcp server erbt von tcp port; ebenso tcp client
     private TCPPort() {}
 
     public static class TCPException extends Exception {
@@ -48,7 +49,7 @@ public class TCPPort {
 
             int bytesRead = connectionEndPointIn.read(requestPDU);
             if (bytesRead >= BUFFER_SIZE) {
-                System.err.println("buffer to small");
+                throw new TCPPort.TCPException("reception failed since buffer too small");
             }
             // 4. process request
             // deserialize and return request
@@ -57,7 +58,7 @@ public class TCPPort {
             throw new TCPPort.TCPException("host unknown");
         } catch (IOException e) {
 
-            // check wether connected to a client
+            // check whether connected to a client
 
             throw new TCPPort.TCPException("reception failed");
         }

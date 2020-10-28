@@ -60,6 +60,7 @@ public class WeatherStationApplication {
                 amr.running = false;
 
             } else if (input.equals(MIN_MAX_COMMAND) && weatherStationRunning) {
+                //hier body von Methode direkt reinschreiben -> über getMin...
                 System.out.println(weatherStation.minMaxInfo());
 
             } else if (input.equals(MIN_MAX_RESET_COMMAND) && weatherStationRunning) {

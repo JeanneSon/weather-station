@@ -1,5 +1,3 @@
-//junit for WeatherStation, test concept
-
 public class WeatherStation {
 
     private double minTemp;
@@ -17,7 +15,6 @@ public class WeatherStation {
     }
 
     public void setCurrentTemp(double currentTemp, long currentTempTime) {
-        //check if valid (maybe)
         this.currentTemp = currentTemp;
         this.currentTempTime = currentTempTime;
         measuredOneValid = true;
@@ -25,6 +22,7 @@ public class WeatherStation {
     }
 
     public double getCurrentTemp() {
+        //throw exception if not measured -> weatherstation exception
         return currentTemp;
     }
 

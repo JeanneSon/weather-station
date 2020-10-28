@@ -58,7 +58,7 @@ public class TCPServer {
         return TCPPort.awaitMessage(TCPServer.connectionEndPoint, BUFFER_SIZE);
     }
 
-    public void closer() {
+    public void closer() throws TCPPort.TCPException {
         try {
             // 5. release the connection - close the client socket
             //TCP_DISCONNECT_REQUEST
@@ -67,7 +67,7 @@ public class TCPServer {
             // 6. close the server socket
             serviceAccessPoint.close();
         } catch (IOException ex) {
-            //
+            throw new TCPPort.TCPException("closing failed");
         }
     }
 
