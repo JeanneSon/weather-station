@@ -21,7 +21,7 @@ public final class Sensor {
     }
 
     public String getCurrentTemp() {
-        double value = ConnectionManager.round(MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble(), 2);
+        double value = GeneralManager.round(MIN_TEMP + (MAX_TEMP - MIN_TEMP) * ImportManager.generateRandomDouble(), 2);
         //improve cutter
         return String.valueOf(value + ":" + System.currentTimeMillis());
     }

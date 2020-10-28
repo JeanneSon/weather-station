@@ -1,11 +1,12 @@
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class ConnectionManager {
+public class GeneralManager {
 
     public static final int SERVER_PORT = 10001;
 
-    private ConnectionManager() {
+    private GeneralManager() {
     }
 
     /**
@@ -49,5 +50,14 @@ public class ConnectionManager {
         BigDecimal bd = BigDecimal.valueOf(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    public static String timeInMillisToDate(long timeInMillis) {
+        long millis = timeInMillis % 1000;
+        long second = (timeInMillis / 1000) % 60;
+        long minute = (timeInMillis / (1000 * 60)) % 60;
+        long hour = (timeInMillis / (1000 * 60 * 60)) % 24;
+
+        return String.format("%02d:%02d:%02d.%d", hour, minute, second, millis);
     }
 }

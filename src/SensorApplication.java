@@ -24,37 +24,42 @@ public class SensorApplication {
     private static Sensor sensor;
     private static TCPServer server;
 
+    private static boolean sensorRunning;
+
     //order of displaying menu
     public static void main(String[] args) {
 
-        server = new TCPServer();
-        server.awaitConnection();
-
         DataSenderRunnable dsr = new DataSenderRunnable();
         Thread dataSenderThread = new Thread(dsr);
-        dataSenderThread.start();
 
         AwaitMessageRunnable amr = new AwaitMessageRunnable(dsr);
         Thread awaitMessageThread = new Thread(amr);
-        awaitMessageThread.start();
 
-        System.out.println("SENSORAPPLICATION:");
-        System.out.println("- Type \"" + START_SENSOR_COMMAND + " <locationname>\" to start the sensor");
-        System.out.println("- Type \"" + STOP_SENSOR_COMMAND + "\" to stop the sensor");
-        System.out.println("- Type \"" + EXIT_DIALOG_COMMAND + "\" to close this menu");
-
+        sensorRunning = false;
         String input = "";
         while (!input.equals(EXIT_DIALOG_COMMAND)) {
+
+            sensorRunning = sensor != null;
+
+            printMenu();
             input = sc.nextLine();
 
-            if (input.matches(START_SENSOR_COMMAND_REGEX)) {
+            if (input.matches(START_SENSOR_COMMAND_REGEX) && !sensorRunning) {
                 String location = input.split(" ", 2)[1];
                 System.out.println("starting a Sensor " + location);
                 sensor = new Sensor(1, 1, location);
+                server = new TCPServer();
+                server.awaitConnection();
+                dataSenderThread.start();
+                awaitMessageThread.start();
 
                 //server.sendMessage(input);
-            } else if (input.equals(STOP_SENSOR_COMMAND)) {
-                System.out.println("STOP SENSOR");
+            } else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
+                sensor = null;
+                server = null;
+                amr.running = false;
+                dsr.running = false;
+                System.out.println("stopping sensor...");
 
             } else {
                 System.out.println("Invalid input!");
@@ -103,7 +108,9 @@ public class SensorApplication {
 
             while (true) {
                 if (running) {
+
                     server.sendMessage(sensor.getCurrentTemp());
+
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {
@@ -112,5 +119,21 @@ public class SensorApplication {
                 }
             }
         }
+    }
+
+    static void printMenu() {
+        System.out.println("\n\n\n\n\n\n\n\n");
+        System.out.println("SENSORAPPLICATION:");
+        System.out.println("SENSOR:");
+        if (!sensorRunning) {
+            System.out.println("- Type \"" + START_SENSOR_COMMAND + " <locationname>\" to start the sensor");
+        }
+        if (sensorRunning) {
+            System.out.println("- Type \"" + STOP_SENSOR_COMMAND + "\" to stop the sensor");
+        }
+        System.out.println("- Type \"" + EXIT_DIALOG_COMMAND + "\" to close this menu");
+        System.out.println("_______________________________________________");
+
+        System.out.println("Input: ");
     }
 }

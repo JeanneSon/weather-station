@@ -45,7 +45,7 @@ public class TCPServer {
 
             OutputStream connectionEndPointOut = connectionEndPoint.getOutputStream();
             //Use TCP DATA service: TCP_DATA.response(responsePDU)
-            System.out.println("Server sending response: " + responseMessage);
+            //System.out.println("Server sending response: " + responseMessage);
             connectionEndPointOut.write(responsePDU);
 
         } catch (IOException ex) {
@@ -85,12 +85,12 @@ public class TCPServer {
             //Use TCP DATA service: TCP_DATA.indication(requestPDU)
             int bytesRead = connectionEndPointIn.read(requestPDU);
             if (bytesRead >= BUFFER_SIZE) {
-                System.out.println("buffer to small");
+                System.err.println("buffer to small");
             }
             // 4. process request
             // deserialize request
             String requestMessage = new String(requestPDU).trim();
-            System.out.println("Server received request: " + requestMessage);
+            //System.out.println("Server received request: " + requestMessage);
 
             return requestMessage;
         } catch (IOException ex) {

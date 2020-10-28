@@ -1,4 +1,5 @@
 //junit for WeatherStation, test concept
+
 public class WeatherStation {
 
     private double minTemp;
@@ -17,6 +18,22 @@ public class WeatherStation {
         this.currentTempTime = currentTempTime;
         measuredOneValid = true;
         updateMinTempAndMaxTemp();
+    }
+
+    public double getCurrentTemp() {
+        return currentTemp;
+    }
+
+    public long getCurrentTempTime() {
+        return currentTempTime;
+    }
+
+    public double getMinTemp() {
+        return minTemp;
+    }
+
+    public double getMaxTemp() {
+        return maxTemp;
     }
 
     private void updateMinTempAndMaxTemp() {

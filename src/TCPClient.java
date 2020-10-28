@@ -33,7 +33,7 @@ public class TCPClient {
             serviceAccessPoint = new Socket();
             serviceAccessPoint.connect(new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID), WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT);
         } catch (IOException ex) {
-            System.out.println("TCP: Connect response failed - no connection");
+            System.err.println("TCP: Connect response failed - no connection");
         }
     }
 
@@ -56,7 +56,7 @@ public class TCPClient {
 
             // 3. Send the packet request to this socket
             OutputStream connectionEndPointOut = serviceAccessPoint.getOutputStream();
-            System.out.println("Client sending request: " + requestMessage);
+            //System.out.println("Client sending request: " + requestMessage);
             //use TCP DATA service: TCP_DATA_REQ(requestPDU)
             connectionEndPointOut.write(requestPDU);
 
@@ -79,16 +79,15 @@ public class TCPClient {
                 byte[] responsePDU = new byte[BUFFER_SIZE];
                 int bytesRead = connectionEndPointIn.read(responsePDU);
                 //if (bytesRead == -1) { System.out.println("Timeout Workaround"); timeout = true; }
-                System.out.println("bytes read: " + bytesRead);
+                //System.out.println("bytes read: " + bytesRead);
 
                 String responseMessage = new String(responsePDU).trim();
-                System.out.println("Client received response: "
-                        + responseMessage);
+                //System.out.println("Client received response: " + responseMessage);
 
                 return responseMessage;
             } catch (SocketTimeoutException e) {
 
-                System.out.println("Timeout action!");
+                //System.out.println("Timeout action!");
             }
 
             //phase : CONNECTION RELEASE
@@ -96,7 +95,7 @@ public class TCPClient {
             //TCP_CONNECT_CNF(fail)	//P_ABORD_IND
             e.printStackTrace();
         } catch (IOException ex) {
-            System.out.println("TCP: Connect response failed - no connection");
+            System.err.println("TCP: Connect response failed - no connection");
         }
 
         return null;
