@@ -19,11 +19,12 @@ public class WeatherStationApplication {
     private static final String INFO_COMMAND = "INFO";
     private static final String DATA_COMMAND = "DATA";
     private static final String DATA_COMMAND_REGEX = "DATA [0-9]+";
+    private static final String DATA_STOP_COMMAND = "DATA STOP";
     private static final String MIN_MAX_COMMAND = "MM";
     private static final String MIN_MAX_RESET_COMMAND = "MM RESET";
     private static final String EXIT_DIALOG_COMMAND = "EXIT";
 
-    private static WeatherStation weatherStation;               
+    private static WeatherStation weatherStation;
     private static TCPClient tcpClient;
 
     private static boolean weatherStationRunning;
@@ -60,13 +61,18 @@ public class WeatherStationApplication {
                 amr.running = false;
 
             } else if (input.equals(MIN_MAX_COMMAND) && weatherStationRunning) {
-                //hier body von Methode direkt reinschreiben -> über getMin...
-                System.out.println(weatherStation.minMaxInfo());
+                if (weatherStation.getMeasuredOneValid()) {
+                    System.out.println("Since last reset / start of station: Minimum: " + weatherStation.getMinTemp() + "  Maximum: " + weatherStation.getMaxTemp());
+                } else {
+                    System.out.println("No valid value measured until now.");
+                }
 
             } else if (input.equals(MIN_MAX_RESET_COMMAND) && weatherStationRunning) {
                 weatherStation.reset();
 
-            } else if ((input.equals(INFO_COMMAND) || input.matches(DATA_COMMAND_REGEX))
+            } else if ((input.equals(INFO_COMMAND)
+                    || input.matches(DATA_COMMAND_REGEX)
+                    || input.equals(DATA_STOP_COMMAND))
                     && weatherStationRunning) {
                 System.out.println("sending...");
                 try {
@@ -84,16 +90,19 @@ public class WeatherStationApplication {
     // fix menu
     // data-stop
     // use closer
-
     static void printMenu() {
         System.out.println("\n\n\n\n\n\n\n\n");
         System.out.println("WEATHERSTATIONAPPLICATION:");
         System.out.println("WEATHERSTATION:");
         if (weatherStationRunning && weatherStation.getMeasuredOneValid()) {
-            System.out.println("Most recent transmitted temp: \n\t" + weatherStation.getCurrentTemp() + 
-                                "°C at " + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()));
-            System.out.println(weatherStation.minMaxInfo());
-        } else { 
+            System.out.println("Most recent transmitted temp: \n\t" + weatherStation.getCurrentTemp()
+                    + "°C at " + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()));
+            if (weatherStation.getMeasuredOneValid()) {
+                System.out.println("Since last reset / start of station: Minimum: " + weatherStation.getMinTemp() + "  Maximum: " + weatherStation.getMaxTemp());
+            } else {
+                System.out.println("No valid value measured until now.");
+            }
+        } else {
             System.out.println("No valid value measured until now.");
         }
         System.out.println("_______________________________________________");
@@ -137,11 +146,11 @@ public class WeatherStationApplication {
                             weatherStation.setCurrentTemp(Double.parseDouble(message.split(":")[0]), Long.parseLong(message.split(":")[1]));
                             //System.out.println(weatherStation.minMaxInfo());
                             printMenu();
-                        }
-                        else {
+                        } else {
                             System.out.println(message);
                         }
-                    } try {
+                    }
+                    try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {
                         System.out.println(e);

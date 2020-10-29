@@ -12,13 +12,14 @@ import java.util.Scanner;
  */
 public class SensorApplication {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in, "iso-8859-1");
 
-    private static final String START_SENSOR_COMMAND_REGEX = "START [\\wäüöß]+";
+    private static final String START_SENSOR_COMMAND_REGEX = "START [\\wäöüÄÖÜß]+";
     private static final String START_SENSOR_COMMAND = "START";
     private static final String STOP_SENSOR_COMMAND = "STOP";
     private static final String INFO_COMMAND = "INFO";
     private static final String DATA_COMMAND_REGEX = "DATA [0-9]+";
+    private static final String DATA_STOP_COMMAND = "DATA STOP";
     private static final String EXIT_DIALOG_COMMAND = "EXIT";
 
     private static Sensor sensor;
@@ -90,13 +91,13 @@ public class SensorApplication {
                         String message = server.awaitMessage();
                         if (message.equals(INFO_COMMAND)) {
                             server.sendMessage(sensor.info());
-    
+
                         } else if (message.matches(DATA_COMMAND_REGEX)) {
                             dsr.running = true;
                             dsr.delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
-    
-                            // }   else if (message.equals("STOP")) {
-                            //    dsr.running = false;
+
+                        } else if (message.equals(DATA_STOP_COMMAND)) {
+                            dsr.running = false;
                         }
                     } catch (TCPPort.TCPException e) {
                         System.out.println(e.getMessage());
