@@ -43,13 +43,11 @@ public class TCPClient extends TCPPort {
         return awaitMessage(TCPClient.serviceAccessPoint, BUFFER_SIZE);
     }
 
-    public void closer() throws TCPException{
-        try {
-            // 6. release connection - close socket
-            //TCP_DISCONNECT_REQ
-            serviceAccessPoint.close();
-        } catch (IOException e) {
-            throw new TCPException("closing failed");
-        }
+    public void closeSocket() throws TCPException{
+        closeSocket(serviceAccessPoint);   
+    }
+
+    public boolean serverIsInactive() {
+        return serviceAccessPoint.isClosed();
     }
 }

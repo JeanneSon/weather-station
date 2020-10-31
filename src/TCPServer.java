@@ -13,8 +13,7 @@ import java.net.Socket;
  * @author j
  */
 
-//extract code snippets they have in common
-
+// extract code snippets they have in common
 
 public class TCPServer extends TCPPort {
 
@@ -22,6 +21,11 @@ public class TCPServer extends TCPPort {
     public static final int SERVER_PORT = 10001;
     private static Socket connectionEndPoint;
     private static final int BUFFER_SIZE = 1024;
+    //private static final int WAIT_FOR_MESSAGE_TIME_MILLI_SEC = 4000;
+
+    public Socket getConnectionEndPoint() {
+        return connectionEndPoint;
+    }
 
     // create ServerSocket
     public TCPServer() throws TCPException {
@@ -30,11 +34,16 @@ public class TCPServer extends TCPPort {
             serviceAccessPoint = new ServerSocket(SERVER_PORT);
 
         } catch (IOException ex) {
+
+
+//when does new ServerSocket throw IOException?
+
             throw new TCPException("starting server failed");
         }
     }
 
     public void sendMessage(String responseMessage) throws TCPException {
+        System.out.println("I send .. " + responseMessage);
         TCPPort.sendMessage(TCPServer.connectionEndPoint, responseMessage);
     }
 
@@ -42,11 +51,11 @@ public class TCPServer extends TCPPort {
         try {
             String toReturn = "Server running on port " + serviceAccessPoint.getLocalPort();
 
-            // 2. Listen for a connection to be made to this socket and accept it
-            //wait for connection request
+            // Listen for a connection to be made to this socket and accept it
+            // wait for connection request
             connectionEndPoint = serviceAccessPoint.accept();
-            return toReturn + "\nconnection establishment with "
-                    + connectionEndPoint.getInetAddress().getHostAddress()
+            System.out.println("is serversocket bound?" + connectionEndPoint.isBound());
+            return toReturn + "\nconnection establishment with " + connectionEndPoint.getInetAddress().getHostAddress()
                     + ":" + connectionEndPoint.getPort();
 
         } catch (IOException e) {
@@ -58,16 +67,20 @@ public class TCPServer extends TCPPort {
         return TCPPort.awaitMessage(TCPServer.connectionEndPoint, BUFFER_SIZE);
     }
 
-    public void closer() throws TCPException {
-        try {
-            // 5. release the connection - close the client socket
-            //TCP_DISCONNECT_REQUEST
-            connectionEndPoint.close();
+    public void closeAll() throws TCPException {
+        closeSocket(connectionEndPoint);
+        closeServerSocket();
+    }
 
-            // 6. close the server socket
+    public void closeCurrentSocket() throws TCPException {
+        closeSocket(connectionEndPoint);
+    }
+
+    public void closeServerSocket() throws TCPException {
+        try {
             serviceAccessPoint.close();
-        } catch (IOException ex) {
-            throw new TCPException("closing failed");
+        } catch (IOException e) {
+            throw new TCPException("closing server socket failed");
         }
     }
 

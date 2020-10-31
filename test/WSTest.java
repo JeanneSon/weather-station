@@ -75,7 +75,7 @@ class WSTest {
 
 	@ParameterizedTest
 	@ValueSource(longs = { Long.MIN_VALUE, -10000, -1, 0, 1, 2, 3, 4, Long.MAX_VALUE })
-	void testGetCurrentTempTime(long arg) {
+	void testGetCurrentTempTime(long arg) throws WeatherStation.WeatherStationException {
 
 		long[] dummyValues = { 0, 1, 2, 3, 4, -70000, 76578765 };
 		for (long l : dummyValues) {
