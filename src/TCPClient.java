@@ -36,11 +36,11 @@ public class TCPClient extends TCPPort {
     }
 
     public void sendMessage(String responseMessage) throws TCPException {
-        TCPPort.sendMessage(TCPClient.serviceAccessPoint, responseMessage);
+        sendMessage(TCPClient.serviceAccessPoint, responseMessage);
     }
 
     public String awaitMessage() throws TCPException {
-        return TCPPort.awaitMessage(TCPClient.serviceAccessPoint, BUFFER_SIZE);
+        return awaitMessage(TCPClient.serviceAccessPoint, BUFFER_SIZE);
     }
 
     public void closer() throws TCPException{
