@@ -27,65 +27,87 @@ public class SensorApplication {
 
     private static boolean sensorRunning;
 
+    private static DataSenderRunnable dsr;
+    private static Thread dataSenderThread;
+
+    private static AwaitMessageRunnable amr;
+    private static Thread awaitMessageThread;
+
+
     public static void main(String[] args) {
 
-        DataSenderRunnable dsr = new DataSenderRunnable();
-        Thread dataSenderThread = new Thread(dsr);
-
-        AwaitMessageRunnable amr = new AwaitMessageRunnable(dsr);
-        Thread awaitMessageThread = new Thread(amr);
+        dsr = new DataSenderRunnable();
+        amr = new AwaitMessageRunnable();
+        awaitMessageThread = new Thread(amr);
 
         sensorRunning = false;
         String input = "";
         while (!input.equals(EXIT_DIALOG_COMMAND)) {
 
-            sensorRunning = sensor != null;
+            sensorRunning = (sensor != null);
 
             printMenu();
-            input = sc.nextLine();
+            input = sc.nextLine().toUpperCase();
 
+            
             if (input.matches(START_SENSOR_COMMAND_REGEX) && !sensorRunning) {
                 String location = input.split(" ", 2)[1];
                 System.out.println("starting a Sensor " + location);
                 sensor = new Sensor(1, 1, location);
-                System.out.println("waiting for a weather station to connect...");
                 try {
                     server = new TCPServer();
+                    System.out.println("waiting for a weather station to connect...");
                     server.awaitConnection();
-                    dataSenderThread.start();
+                    //dataSenderThread.start();
                     awaitMessageThread.start();
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
                 }
 
-                //server.sendMessage(input);
-            } else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
-                sensor = null;
-                server = null;
-                amr.running = false;
-                dsr.running = false;
-                System.out.println("stopping sensor...");
+            }
 
-            } else {
+
+                //server.sendMessage(input);
+            else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
+                try {
+                    interruptAndRemoveThread(dataSenderThread);
+                    interruptAndRemoveThread(awaitMessageThread);
+                    sensorRunning = false;
+                    sensor = null;
+                    server.closeAll();
+                    server = null;
+                    System.out.println("stopping sensor...");
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
+                }
+            } else if (!input.equals(EXIT_DIALOG_COMMAND)) {
                 System.out.println("Invalid input!");
             }
         }
+        //or interrupt both threads!
+        
+        sensor = null;
+        server = null;
+        sc.close();
+        System.exit(0);
     }
 
     static class AwaitMessageRunnable implements Runnable {
 
-        DataSenderRunnable dsr;
-
         public volatile boolean running = true;
+        public volatile boolean exit = false;
         public long delay = 100;
 
-        public AwaitMessageRunnable(DataSenderRunnable dsr) {
-            this.dsr = dsr;
-        }
+        
 
         public void run() {
 
-            while (true) {
+            while (!exit) {
+                
+                if (server.getConnectionEndPoint().isClosed()) {
+                    System.out.println("\t\t\t\t\tgetConnectionEndPoint is closed");
+                    break;
+                }
                 if (running) {
                     try {
                         String message = server.awaitMessage();
@@ -93,18 +115,32 @@ public class SensorApplication {
                             server.sendMessage(sensor.info());
 
                         } else if (message.matches(DATA_COMMAND_REGEX)) {
+                            interruptAndRemoveThread(dataSenderThread);
+                            dataSenderThread = new Thread(dsr);
+                            dataSenderThread.start();
                             dsr.running = true;
                             dsr.delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
 
                         } else if (message.equals(DATA_STOP_COMMAND)) {
+
+                            // running
+
                             dsr.running = false;
+                            interruptAndRemoveThread(dataSenderThread);
                         }
                     } catch (TCPPort.TCPException e) {
-                        System.out.println(e.getMessage());
+                        System.out.println(e.getMessage() + " I am in await message of sensor");
                     }
 
                 }
             }
+        }
+    }
+
+    private static void interruptAndRemoveThread(Thread thread) {
+        if (thread != null && thread.isAlive()) {
+            thread.interrupt();
+            thread = null;
         }
     }
 
@@ -114,8 +150,7 @@ public class SensorApplication {
         public long delay = 100;
 
         public void run() {
-
-            while (true) {
+            while (true) { //instead of true
                 if (running) {
 
                     try {
