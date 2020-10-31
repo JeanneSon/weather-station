@@ -7,6 +7,22 @@ public class WeatherStation {
     private long currentTempTime;
     private boolean measuredOneValid;
 
+    public static class WeatherStationException extends Exception {
+
+        /**
+         * Exceptions should always be serializale --> serialVersionUID
+         */
+        private static final long serialVersionUID = 1L;
+
+        public WeatherStationException() {
+            super();    
+        }
+    
+        public WeatherStationException(String msg) {
+            super(msg);
+        }
+    }
+
     public WeatherStation() {
         reset();
     }
@@ -34,34 +50,48 @@ public class WeatherStation {
     /**
      * @throws Exception
      * @return currentTemp
+     * @throws WeatherStation.WeatherStationException
      */
-    public double getCurrentTemp() {
+    public double getCurrentTemp() throws WeatherStationException {
+        if (measuredOneValid)
         //throw exception if not measured -> weatherstation exception
-        return currentTemp;
+            return currentTemp;
+        else
+            throw new WeatherStationException("No value measured until now.");
     }
 
     /**
      * @throws Exception
      * @return currentTempTime
+     * @throws WeatherStation.WeatherStationException
      */
-    public long getCurrentTempTime() {
-        return currentTempTime;
+    public long getCurrentTempTime() throws WeatherStationException {
+        if (measuredOneValid)
+            return currentTempTime;
+        else
+            throw new WeatherStationException("No value measured until now.");
     }
 
     /**
      * @throws Exception
      * @return minTemp
      */
-    public double getMinTemp() {
-        return minTemp;
+    public double getMinTemp() throws WeatherStationException {
+        if (measuredOneValid)
+            return minTemp;
+        else
+            throw new WeatherStationException("No value measured until now.");
     }
 
     /**
      * @throws Exception
      * @return maxTemp
      */
-    public double getMaxTemp() {
-        return maxTemp;
+    public double getMaxTemp() throws WeatherStationException {
+        if (measuredOneValid)
+            return maxTemp;
+        else
+            throw new WeatherStationException("No value measured until now.");
     }
 
     /**
