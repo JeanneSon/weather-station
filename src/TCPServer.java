@@ -16,7 +16,7 @@ import java.net.Socket;
 //extract code snippets they have in common
 
 
-public class TCPServer {
+public class TCPServer extends TCPPort {
 
     public static ServerSocket serviceAccessPoint;
     public static final int SERVER_PORT = 10001;
@@ -24,21 +24,21 @@ public class TCPServer {
     private static final int BUFFER_SIZE = 1024;
 
     // create ServerSocket
-    public TCPServer() throws TCPPort.TCPException {
+    public TCPServer() throws TCPException {
         // 1. create a server socket, bound to the server port.
         try {
             serviceAccessPoint = new ServerSocket(SERVER_PORT);
 
         } catch (IOException ex) {
-            throw new TCPPort.TCPException("starting server failed");
+            throw new TCPException("starting server failed");
         }
     }
 
-    public void sendMessage(String responseMessage) throws TCPPort.TCPException {
+    public void sendMessage(String responseMessage) throws TCPException {
         TCPPort.sendMessage(TCPServer.connectionEndPoint, responseMessage);
     }
 
-    public String awaitConnection() throws TCPPort.TCPException {
+    public String awaitConnection() throws TCPException {
         try {
             String toReturn = "Server running on port " + serviceAccessPoint.getLocalPort();
 
@@ -50,15 +50,15 @@ public class TCPServer {
                     + ":" + connectionEndPoint.getPort();
 
         } catch (IOException e) {
-            throw new TCPPort.TCPException("waiting failed");
+            throw new TCPException("waiting failed");
         }
     }
 
-    public String awaitMessage() throws TCPPort.TCPException {
+    public String awaitMessage() throws TCPException {
         return TCPPort.awaitMessage(TCPServer.connectionEndPoint, BUFFER_SIZE);
     }
 
-    public void closer() throws TCPPort.TCPException {
+    public void closer() throws TCPException {
         try {
             // 5. release the connection - close the client socket
             //TCP_DISCONNECT_REQUEST
@@ -67,7 +67,7 @@ public class TCPServer {
             // 6. close the server socket
             serviceAccessPoint.close();
         } catch (IOException ex) {
-            throw new TCPPort.TCPException("closing failed");
+            throw new TCPException("closing failed");
         }
     }
 
