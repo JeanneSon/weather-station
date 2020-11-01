@@ -51,6 +51,15 @@ public class TCPPort {
     public static String awaitMessage(Socket socket, int BUFFER_SIZE) throws TCPException {
 
         try {
+            System.out.println("TCPPort.awaitMessage()");
+
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
+
+
             // 3. receive a message on this client socket.
             byte[] requestPDU = new byte[BUFFER_SIZE];
             InputStream connectionEndPointIn = socket.getInputStream();
@@ -61,14 +70,20 @@ public class TCPPort {
             }
             if (bytesRead == -1) {
                 socket.close();
-                throw new TCPException("the other closed - so I closed as well");
+                throw new TCPException("----- closing the socket in reaction to closed peer socket ----");
             }
             // 4. process request
             // deserialize and return request
             return new String(requestPDU).trim();
         } catch (SocketException e) {
-            e.printStackTrace();
-            throw new TCPException("waiting expired - timeout");
+            if (e.getMessage().equals("Socket closed")) {
+                System.out.println("---------------- the socket is now closed -------------");
+            } else if (e.getMessage().equals("Connection reset")) {
+                closeSocket(socket);
+            }
+            else {
+                throw new TCPException(e.getMessage());
+            }
         } catch (UnknownHostException e) {
             throw new TCPException("host unknown");
         } catch (IOException e) {

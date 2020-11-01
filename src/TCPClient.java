@@ -17,7 +17,7 @@ public class TCPClient extends TCPPort {
     private static final String SERVER_NAME = "127.0.0.1";
     private static final int DESTINATION_PORT_ID = 10001;
     //private static final int WAIT_FOR_MESSAGE_TIME_MILLI_SEC = 3000;
-    private static final int WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT = 5000;
+    private static final int WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT = 1500;
     private static final int BUFFER_SIZE = 1024;
 
     private static Socket serviceAccessPoint;
@@ -27,9 +27,13 @@ public class TCPClient extends TCPPort {
         // (port number, IP address)
         try {
             serviceAccessPoint = new Socket();
-            serviceAccessPoint.connect(new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID), WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT);
+            serviceAccessPoint.connect(
+                                        new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID), 
+                                        WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT
+                                );
+            System.out.println(serviceAccessPoint.toString());
         } catch (IOException ex) {
-            throw new TCPException("TCP: Connect response failed - no connection");
+            throw new TCPException("------------ conenction failed; could not connect to a sensor ------");
         } catch (Exception e) {
             throw new TCPException("TCP: Connect failed - other exception");
         }

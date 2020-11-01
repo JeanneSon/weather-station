@@ -1,3 +1,10 @@
+/**
+ * - threads stop / start / interrupt / new assign
+ * - data 7 -> data stop -> data 4 (nullPointer in sensor when stopped + kommt doppelt)
+ * - detect sending failed in Sensor
+ * - 
+ */
+
 
 import java.util.Scanner;
 
@@ -37,7 +44,6 @@ public class WeatherStationApplication {
     public static void main(String[] args) {
 
         amr = new AwaitMessageRunnable();
-        awaitMessageThread = new Thread(amr);
 
         //verify first that connection is established
         weatherStationRunning = false;
@@ -53,8 +59,10 @@ public class WeatherStationApplication {
                 try {
                     tcpClient = new TCPClient();
                     weatherStation = new WeatherStation();
+                    awaitMessageThread = new Thread(amr);
                     awaitMessageThread.start();
                     amr.running = true;
+                    System.out.println("I start again.....................");
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
                 }
@@ -62,10 +70,17 @@ public class WeatherStationApplication {
             } else if (input.equals(STOP_STATION_COMMAND) && weatherStationRunning) {
                 try {
                     tcpClient.closeSocket();
+                    interruptAndRemoveThread(awaitMessageThread);
                     weatherStation = null;
                     tcpClient = null;
-                    //awaitMessageThread.stop();
                     amr.running = false;
+
+                    // give stop process time before re-displaying menu
+                    try {
+                        Thread.sleep(2500);
+                    } catch (InterruptedException e) {
+                        System.out.println("I wanted to give stop process time. Something went wrong.");
+                    }
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
                 }
@@ -76,6 +91,13 @@ public class WeatherStationApplication {
                             + weatherStation.getMinTemp() + "  Maximum: " + weatherStation.getMaxTemp());
                 } catch (WeatherStation.WeatherStationException e) {
                     System.out.println("No valid value measured until now.");
+                }
+
+                // give user time to read result before re-displaying menu
+                try {
+                    Thread.sleep(2500);
+                } catch (InterruptedException e) {
+                    System.out.println("I wanted to give user time. Something went wrong.");
                 }
 
             } else if (input.equals(MIN_MAX_RESET_COMMAND) && weatherStationRunning) {
@@ -91,12 +113,25 @@ public class WeatherStationApplication {
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
                 }
+
+                // give user time to read result before re-displaying menu
+                try {
+                    Thread.sleep(2500);
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                }
             
             } else if (input.equals(EXIT_DIALOG_COMMAND)) {
                 System.exit(0);
                 
             } else {
                 System.out.println("Invalid input!");
+                // give user time to read result before re-displaying menu
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                }
             }
         } while (!input.equals(EXIT_DIALOG_COMMAND));
     }
@@ -105,37 +140,35 @@ public class WeatherStationApplication {
     // data-stop
     // use closer
     static void printMenu() {
-        System.out.println("\n\n\n\n\n\n\n\n");
-        System.out.println("WEATHERSTATIONAPPLICATION:");
-        System.out.println("WEATHERSTATION:");
+        StringBuffer menu = new StringBuffer("\n\n\n\n\n\n\n\nWEATHERSTATIONAPPLICATION:\nWEATHERSTATION:\n");
         if (weatherStationRunning && weatherStation.getMeasuredOneValid()) {
             try {
-                System.out.println("Most recent transmitted temp: \n\t" + weatherStation.getCurrentTemp() + 
-                        "°C at " + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()));
-                System.out.println("Since last reset / start of station: Minimum: " + 
-                        weatherStation.getMinTemp() + "°C  Maximum: " + weatherStation.getMaxTemp() + "°C");
+                menu.append("Most recent transmitted temp: \t" + weatherStation.getCurrentTemp() + 
+                        "°C at " + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()) +
+                        "\nSince last reset / start of station: Minimum: " + 
+                        weatherStation.getMinTemp() + "°C  Maximum: " + weatherStation.getMaxTemp() + "°C\n");
             } catch (WeatherStation.WeatherStationException e) {
-                System.out.println("No valid value measured until now.");
+                menu.append("No valid value measured until now.\n");
             }
         } 
-        System.out.println("_______________________________________________");
-        System.out.println("MENU:");
+        menu.append("_______________________________________________\nMENU:\n");
         if (!weatherStationRunning) {
-            System.out.println("- Type \"" + START_STATION_COMMAND + "\" to start the weatherstation");
+            menu.append("- Type \"" + START_STATION_COMMAND + "\" to start the weatherstation\n");
         }
         if (weatherStationRunning) {
-            System.out.println("- Type \"" + STOP_STATION_COMMAND + "\" to stop the weatherstation");
-            System.out.println("- Type \"" + INFO_COMMAND + "\" for sensor information");
-            System.out.println("- Type \"" + DATA_COMMAND + " <interval in s>\" for periodic sensor data");
-            System.out.println("- Type \"" + DATA_STOP_COMMAND + "\" to stop periodic sending");
-            System.out.println("- Type \"" + MIN_MAX_COMMAND + "\" to get lowest and highest messured temperature");
-            System.out.println("- Type \"" + MIN_MAX_RESET_COMMAND + "\" to reset lowest and highest messured temperature");
+            menu.append("- Type \"" + STOP_STATION_COMMAND  + "\" to stop the weatherstation\n"               +
+                        "- Type \"" + INFO_COMMAND          + "\" for sensor information\n"                   +
+                        "- Type \"" + DATA_COMMAND          + " <interval in s>\" for periodic sensor data\n" +
+                        "- Type \"" + DATA_STOP_COMMAND     + "\" to stop periodic sending\n"                 +
+                        "- Type \"" + MIN_MAX_COMMAND       + "\" to get lowest and highest measured temperature\n"+
+                        "- Type \"" + MIN_MAX_RESET_COMMAND + 
+                                                    "\" to reset lowest and highest measured temperature\n"
+                    );
         }
-
-        System.out.println("- Type \"" + EXIT_DIALOG_COMMAND + "\" to close this menu");
-        System.out.println("_______________________________________________");
-
-        System.out.println("Input: ");
+        menu.append("- Type \"" + EXIT_DIALOG_COMMAND + "\" to close this menu\n" +
+                    "_______________________________________________\n" +
+                    "Input: ");
+        System.out.println(menu.toString());
     }
 
     static class AwaitMessageRunnable implements Runnable {
@@ -176,6 +209,13 @@ public class WeatherStationApplication {
 
                 }
             }
+        }
+    }
+
+    private static void interruptAndRemoveThread(Thread thread) {
+        if (thread != null && thread.isAlive()) {
+            thread.interrupt();
+            thread = null;
         }
     }
 

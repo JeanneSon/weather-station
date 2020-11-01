@@ -77,11 +77,24 @@ public class SensorApplication {
                     server.closeAll();
                     server = null;
                     System.out.println("stopping sensor...");
+
+                    // give time to stop and close server and sensor
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        System.out.println("I wanted to give stop process time. Something went wrong.");
+                    }
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
                 }
             } else if (!input.equals(EXIT_DIALOG_COMMAND)) {
                 System.out.println("Invalid input!");
+                // give user time to read result before re-displaying menu
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println("I wanted to give user time. Something went wrong.");
+                }
             }
         }
         //or interrupt both threads!
@@ -104,8 +117,12 @@ public class SensorApplication {
 
             while (!exit) {
                 
+                if (server == null) {
+                    System.out.println("------------ connection does not exist; server is down ------------");
+                    break;
+                }
                 if (server.getConnectionEndPoint().isClosed()) {
-                    System.out.println("\t\t\t\t\tgetConnectionEndPoint is closed");
+                    System.out.println("-------- connection does not exist; please stop the sensor ---------");
                     break;
                 }
                 if (running) {
@@ -118,8 +135,8 @@ public class SensorApplication {
                             interruptAndRemoveThread(dataSenderThread);
                             dataSenderThread = new Thread(dsr);
                             dataSenderThread.start();
-                            dsr.running = true;
                             dsr.delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
+                            dsr.running = true;
 
                         } else if (message.equals(DATA_STOP_COMMAND)) {
 
@@ -129,7 +146,7 @@ public class SensorApplication {
                             interruptAndRemoveThread(dataSenderThread);
                         }
                     } catch (TCPPort.TCPException e) {
-                        System.out.println(e.getMessage() + " I am in await message of sensor");
+                        System.out.println(e.getMessage());
                     }
 
                 }
@@ -147,7 +164,7 @@ public class SensorApplication {
     static class DataSenderRunnable implements Runnable {
 
         public volatile boolean running = false;
-        public long delay = 100;
+        public volatile long delay = 100; //default
 
         public void run() {
             while (true) { //instead of true
@@ -158,7 +175,7 @@ public class SensorApplication {
                         try {
                             Thread.sleep(delay);
                         } catch (InterruptedException e) {
-                            System.out.println(e);
+                            System.out.println("interrupt sending as it was requested");
                         }
                     } catch (TCPPort.TCPException e) {
                         System.out.println(e.getMessage());

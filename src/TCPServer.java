@@ -54,7 +54,6 @@ public class TCPServer extends TCPPort {
             // Listen for a connection to be made to this socket and accept it
             // wait for connection request
             connectionEndPoint = serviceAccessPoint.accept();
-            System.out.println("is serversocket bound?" + connectionEndPoint.isBound());
             return toReturn + "\nconnection establishment with " + connectionEndPoint.getInetAddress().getHostAddress()
                     + ":" + connectionEndPoint.getPort();
 
