@@ -1,5 +1,6 @@
 
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -27,19 +28,13 @@ public class SensorApplication {
 
     private static boolean sensorRunning;
 
-    private static DataSenderRunnable dsr;
-    private static Thread dataSenderThread;
+    private static DataSenderThread dataSenderThread;
 
-    private static AwaitMessageRunnable amr;
-    private static Thread awaitMessageThread;
-
+    private static AwaitMessageThread awaitMessageThread;
 
     public static void main(String[] args) {
 
-        dsr = new DataSenderRunnable();
-        amr = new AwaitMessageRunnable();
-        awaitMessageThread = new Thread(amr);
-
+        
         sensorRunning = false;
         String input = "";
         while (!input.equals(EXIT_DIALOG_COMMAND)) {
@@ -49,7 +44,6 @@ public class SensorApplication {
             printMenu();
             input = sc.nextLine().toUpperCase();
 
-            
             if (input.matches(START_SENSOR_COMMAND_REGEX) && !sensorRunning) {
                 String location = input.split(" ", 2)[1];
                 System.out.println("starting a Sensor " + location);
@@ -58,7 +52,8 @@ public class SensorApplication {
                     server = new TCPServer();
                     System.out.println("waiting for a weather station to connect...");
                     server.awaitConnection();
-                    //dataSenderThread.start();
+                    // dataSenderThread.start();
+                    awaitMessageThread = new AwaitMessageThread();
                     awaitMessageThread.start();
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
@@ -66,12 +61,15 @@ public class SensorApplication {
 
             }
 
-
-                //server.sendMessage(input);
+            // server.sendMessage(input);
             else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
                 try {
-                    interruptAndRemoveThread(dataSenderThread);
-                    interruptAndRemoveThread(awaitMessageThread);
+                    if (dataSenderThread != null) {
+                        dataSenderThread.kill();
+                        dataSenderThread = null;
+                    }
+                    awaitMessageThread.kill();
+                    awaitMessageThread = null;
                     sensorRunning = false;
                     sensor = null;
                     server.closeAll();
@@ -85,7 +83,7 @@ public class SensorApplication {
                         System.out.println("I wanted to give stop process time. Something went wrong.");
                     }
                 } catch (TCPPort.TCPException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getMessage() + "stopping failed");
                 }
             } else if (!input.equals(EXIT_DIALOG_COMMAND)) {
                 System.out.println("Invalid input!");
@@ -97,26 +95,33 @@ public class SensorApplication {
                 }
             }
         }
-        //or interrupt both threads!
-        
+        // or interrupt both threads!
+
         sensor = null;
         server = null;
         sc.close();
         System.exit(0);
     }
 
-    static class AwaitMessageRunnable implements Runnable {
+    static class AwaitMessageThread extends Thread {
 
-        public volatile boolean running = true;
+        public AtomicBoolean running = new AtomicBoolean(true);
         public volatile boolean exit = false;
         public long delay = 100;
 
-        
+        public void kill() {
+            this.running.set(false);
+            try {
+                this.join();
+            } catch (InterruptedException e) {
+                //
+            }
+        }
 
         public void run() {
 
-            while (!exit) {
-                
+            while (running.get()) {
+
                 if (server == null) {
                     System.out.println("------------ connection does not exist; server is down ------------");
                     break;
@@ -125,63 +130,73 @@ public class SensorApplication {
                     System.out.println("-------- connection does not exist; please stop the sensor ---------");
                     break;
                 }
-                if (running) {
-                    try {
-                        String message = server.awaitMessage();
-                        if (message.equals(INFO_COMMAND)) {
-                            server.sendMessage(sensor.info());
+                try {
+                    String message = server.awaitMessage();
+                    if (message.equals(INFO_COMMAND)) {
+                        server.sendMessage(sensor.info());
 
-                        } else if (message.matches(DATA_COMMAND_REGEX)) {
-                            interruptAndRemoveThread(dataSenderThread);
-                            dataSenderThread = new Thread(dsr);
-                            dataSenderThread.start();
-                            dsr.delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
-                            dsr.running = true;
-
-                        } else if (message.equals(DATA_STOP_COMMAND)) {
-
-                            // running
-
-                            dsr.running = false;
-                            interruptAndRemoveThread(dataSenderThread);
+                    } else if (message.matches(DATA_COMMAND_REGEX)) {
+                        // interruptAndRemoveThread(dataSenderThread);
+                        if (dataSenderThread != null) {
+                            dataSenderThread.kill();
                         }
-                    } catch (TCPPort.TCPException e) {
-                        System.out.println(e.getMessage());
-                    }
+                        long delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
+                        dataSenderThread = new DataSenderThread(delay);
+                        dataSenderThread.start();
 
+                    } else if (message.equals(DATA_STOP_COMMAND)) {
+
+                        // running
+                        if (dataSenderThread != null) {
+                            dataSenderThread.kill();
+                            dataSenderThread = null;
+                        }
+
+                        // interruptAndRemoveThread(dataSenderThread);
+                    }
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
                 }
+
+            }
+
+        }
+    }
+
+    static class DataSenderThread extends Thread {
+
+        private AtomicBoolean running = new AtomicBoolean(true);
+        private final long delay;
+
+        public DataSenderThread(long delay) {
+            this.delay = delay;
+        }
+
+        public void kill() {
+            this.running.set(false);
+            this.interrupt();
+            try {
+                this.join();
+            } catch (InterruptedException e) {
+                //
             }
         }
-    }
-
-    private static void interruptAndRemoveThread(Thread thread) {
-        if (thread != null && thread.isAlive()) {
-            thread.interrupt();
-            thread = null;
-        }
-    }
-
-    static class DataSenderRunnable implements Runnable {
-
-        public volatile boolean running = false;
-        public volatile long delay = 100; //default
 
         public void run() {
-            while (true) { //instead of true
-                if (running) {
-
+            while (running.get()) {
+                try {
+                    server.sendMessage(sensor.getCurrentTemp());
                     try {
-                        server.sendMessage(sensor.getCurrentTemp());
-                        try {
-                            Thread.sleep(delay);
-                        } catch (InterruptedException e) {
-                            System.out.println("interrupt sending as it was requested");
-                        }
-                    } catch (TCPPort.TCPException e) {
-                        System.out.println(e.getMessage());
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        System.out.println("interrupt sending as it was requested");
                     }
-
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
+                    System.out.println("server is not sending anymore, please stop server");
+                    break;
                 }
+
             }
         }
     }

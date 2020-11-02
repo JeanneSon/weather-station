@@ -1,10 +1,3 @@
-/**
- * - threads stop / start / interrupt / new assign
- * - data 7 -> data stop -> data 4 (nullPointer in sensor when stopped + kommt doppelt)
- * - detect sending failed in Sensor
- * - 
- */
-
 
 import java.util.Scanner;
 
@@ -70,6 +63,10 @@ public class WeatherStationApplication {
             } else if (input.equals(STOP_STATION_COMMAND) && weatherStationRunning) {
                 try {
                     tcpClient.closeSocket();
+
+// change to kill
+
+
                     interruptAndRemoveThread(awaitMessageThread);
                     weatherStation = null;
                     tcpClient = null;
@@ -197,7 +194,7 @@ public class WeatherStationApplication {
                             Long.parseLong(message.split(":")[1]));
                             //System.out.println(weatherStation.minMaxInfo());
                             printMenu();
-                        } else {
+                        } else if (!message.equals("")) {
                             System.out.println(message);
                         }
                     }

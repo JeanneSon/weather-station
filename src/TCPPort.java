@@ -51,7 +51,6 @@ public class TCPPort {
     public static String awaitMessage(Socket socket, int BUFFER_SIZE) throws TCPException {
 
         try {
-            System.out.println("TCPPort.awaitMessage()");
 
             try {
                 Thread.sleep(4000);
@@ -60,12 +59,14 @@ public class TCPPort {
             }
 
 
-            // 3. receive a message on this client socket.
+            // 3. receive a message on this socket.
+
+            socket.setSoTimeout(200);
             byte[] requestPDU = new byte[BUFFER_SIZE];
             InputStream connectionEndPointIn = socket.getInputStream();
-
             int bytesRead = connectionEndPointIn.read(requestPDU);
-            if (bytesRead >= BUFFER_SIZE) {
+            if (bytesRead > BUFFER_SIZE) {
+                // this should not happen
                 throw new TCPException("reception failed since buffer too small");
             }
             if (bytesRead == -1) {
