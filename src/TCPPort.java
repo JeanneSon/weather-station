@@ -1,5 +1,3 @@
-
-// This class contains all methods used by TCPServer and TCPClient
 import java.net.Socket;
 import java.net.SocketException;
 import java.io.OutputStream;
@@ -7,12 +5,15 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+/**
+ * This class contains the methods used by both classes - TCPServer and TCPClient
+ * @author J.Krug, H.Schall
+ */
 public class TCPPort {
-    //improve - tcp server erbt von tcp port; ebenso tcp client
 
     /**
-     * If you would like to prevent instantiation would be to declare the constructor 
-     * of the parent class as protected. 
+     * prevent instantiation -> declare the constructor 
+     * of the parent class as protected
      * That way, it will not be visible to outside classes other than the ones which extend it.
      * (https://softwareengineering.stackexchange.com/questions/271410/should-abstract-classes-be-used-to-prevent-instantiation)
      */
@@ -34,20 +35,36 @@ public class TCPPort {
         }
     }
 
+    /**
+     * sends the given string via TCP over the given socket
+     * @param connectionEndPoint the given socket
+     * @param responseMessage the given string
+     * @throws TCPException if sending failed
+     */
     public static void sendMessage(Socket connectionEndPoint, String responseMessage) throws TCPException {
         try {
             // serialize data
-            byte[] responsePDU = responseMessage.getBytes();
+            //throws UnsupportedEncodingException (is caught by catching IOException)
+            byte[] responsePDU = responseMessage.getBytes(); 
 
-            OutputStream connectionEndPointOut = connectionEndPoint.getOutputStream();
-            //Use TCP DATA service: TCP_DATA.response(responsePDU)
-            connectionEndPointOut.write(responsePDU);
+            OutputStream connectionEndPointOut = connectionEndPoint.getOutputStream(); //throws IOException
 
+            connectionEndPointOut.write(responsePDU); //throws IOException
+
+            // OutputStream is not closed since "Closing the returned 
+            // OutputStream will close the associated socket."(JavaDoc)
         } catch (IOException e) {
             throw new TCPException("sending failed");
         }
     }
 
+    /**
+     * given socket awaits a message from peer socket
+     * @param socket
+     * @param BUFFER_SIZE
+     * @return received message or 
+     * @throws TCPException
+     */
     public static String awaitMessage(Socket socket, int BUFFER_SIZE) throws TCPException {
 
         try {
@@ -58,24 +75,26 @@ public class TCPPort {
                 System.out.println(e);
             }
 
+            // timeout ensures that InputStream is not blocked in reading forever in case of not receiving a message
+            socket.setSoTimeout(200); // throws SocketException if error in TCP protocol
 
-            // 3. receive a message on this socket.
-
-            socket.setSoTimeout(200);
             byte[] requestPDU = new byte[BUFFER_SIZE];
-            InputStream connectionEndPointIn = socket.getInputStream();
-            int bytesRead = connectionEndPointIn.read(requestPDU);
+            InputStream connectionEndPointIn = socket.getInputStream(); // throws IOException
+            int bytesRead = connectionEndPointIn.read(requestPDU); // throws IOException
+
             if (bytesRead > BUFFER_SIZE) {
                 // this should not happen
-                throw new TCPException("reception failed since buffer too small");
+                throw new TCPException("--------reception failed since buffer too small----------");
             }
             if (bytesRead == -1) {
-                socket.close();
+                // -1 indicates that peer socket is closed
+                socket.close(); // throws IOException
                 throw new TCPException("----- closing the socket in reaction to closed peer socket ----");
             }
-            // 4. process request
+            
             // deserialize and return request
             return new String(requestPDU).trim();
+
         } catch (SocketException e) {
             if (e.getMessage().equals("Socket closed")) {
                 System.out.println("---------------- the socket is now closed -------------");
@@ -94,9 +113,14 @@ public class TCPPort {
         return "";
     }
 
-    public static void closeSocket(Socket point) throws TCPPort.TCPException {
+    /**
+     * close a socket
+     * @param socket
+     * @throws TCPPort.TCPException if closing failed
+     */
+    public static void closeSocket(Socket socket) throws TCPPort.TCPException {
         try {
-            point.close();
+            socket.close();
         } catch (IOException e) {
             throw new TCPException("closing failed");
         }

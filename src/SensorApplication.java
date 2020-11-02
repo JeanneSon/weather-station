@@ -63,28 +63,7 @@ public class SensorApplication {
 
             // server.sendMessage(input);
             else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
-                try {
-                    if (dataSenderThread != null) {
-                        dataSenderThread.kill();
-                        dataSenderThread = null;
-                    }
-                    awaitMessageThread.kill();
-                    awaitMessageThread = null;
-                    sensorRunning = false;
-                    sensor = null;
-                    server.closeAll();
-                    server = null;
-                    System.out.println("stopping sensor...");
-
-                    // give time to stop and close server and sensor
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        System.out.println("I wanted to give stop process time. Something went wrong.");
-                    }
-                } catch (TCPPort.TCPException e) {
-                    System.out.println(e.getMessage() + "stopping failed");
-                }
+                stopSensorApplication();
             } else if (!input.equals(EXIT_DIALOG_COMMAND)) {
                 System.out.println("Invalid input!");
                 // give user time to read result before re-displaying menu
@@ -96,11 +75,36 @@ public class SensorApplication {
             }
         }
         // or interrupt both threads!
-
-        sensor = null;
-        server = null;
+        stopSensorApplication();
         sc.close();
         System.exit(0);
+    }
+
+    private static void stopSensorApplication() {
+        try {
+            if (dataSenderThread != null) {
+                dataSenderThread.kill();
+                dataSenderThread = null;
+            }
+            if (awaitMessageThread != null) {
+                awaitMessageThread.kill();
+                awaitMessageThread = null;
+            }
+            sensorRunning = false;
+            sensor = null;
+            server.closeAll();
+            server = null;
+            System.out.println("stopping sensor...");
+
+            // give time to stop and close server and sensor
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                System.out.println("I wanted to give stop process time. Something went wrong.");
+            }
+        } catch (TCPPort.TCPException e) {
+            System.out.println(e.getMessage() + "stopping failed");
+        }
     }
 
     static class AwaitMessageThread extends Thread {
@@ -189,7 +193,7 @@ public class SensorApplication {
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {
-                        System.out.println("interrupt sending as it was requested");
+                        System.out.println("---- sending process was interrupted -----");
                     }
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
