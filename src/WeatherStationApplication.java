@@ -3,7 +3,6 @@
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 /**
  *
  * @author j
@@ -18,6 +17,7 @@ public class WeatherStationApplication {
     private static final String DATA_COMMAND = "DATA";
     private static final String DATA_COMMAND_REGEX = "DATA [0-9]+";
     private static final String DATA_STOP_COMMAND = "DATA STOP";
+    private static final String STOP_SENSOR_REQUEST = "STOP REQUEST";
     private static final String MIN_MAX_COMMAND = "MM";
     private static final String MIN_MAX_RESET_COMMAND = "MM RESET";
     private static final String EXIT_DIALOG_COMMAND = "EXIT";
@@ -62,18 +62,22 @@ public class WeatherStationApplication {
                 }
 
             } else if (input.equals(STOP_STATION_COMMAND) && weatherStationRunning) {
+                try {
+                    tcpClient.sendMessage(STOP_SENSOR_REQUEST);
+                } catch (TCPPort.TCPException e) {
+                    System.out.println(e.getMessage());
+                }
                 System.out.println("stopping weather station....");
                 try {
                     stopWeatherStation();
-
-                    // give stop process time before re-displaying menu
-                    try {
-                        Thread.sleep(2500);
-                    } catch (InterruptedException e) {
-                        System.out.println("I wanted to give stop process time. Something went wrong.");
-                    }
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
+                }
+                // give stop process time before re-displaying menu
+                try {
+                    Thread.sleep(2500);
+                } catch (InterruptedException e) {
+                    System.out.println("I wanted to give stop process time. Something went wrong.");
                 }
 
             } else if (input.equals(MIN_MAX_COMMAND) && weatherStationRunning) {
@@ -128,13 +132,19 @@ public class WeatherStationApplication {
                     System.out.println(e);
                 }
             }
+
+
+//put sleep here
+
+
         } while (!input.equals(EXIT_DIALOG_COMMAND));
-        System.out.println("I am at the end of main.");
+        System.out.println("exiting...");
+        sc.close();
         try {
             stopWeatherStation();
         } catch (TCPPort.TCPException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            System.exit(0);
         }
     }
 
@@ -151,10 +161,7 @@ public class WeatherStationApplication {
         weatherStation = null;
     }
 
-    // fix menu
-    // data-stop
-    // use closer
-    static void printMenu() {
+    private static void printMenu() {
         StringBuffer menu = new StringBuffer("\n\n\n\n\n\n\n\nWEATHERSTATIONAPPLICATION:\nWEATHERSTATION:\n");
         if (weatherStationRunning && weatherStation.getMeasuredOneValid()) {
             try {
@@ -219,12 +226,10 @@ public class WeatherStationApplication {
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
                 }
-                if (message != null && weatherStation != null) {// muss weg
-                    // System.out.println("Received: " + message);
+                if (message != null && weatherStation != null) {
                     if (GeneralManager.isDoubleAndLong(message)) {
                         weatherStation.setCurrentTemp(Double.parseDouble(message.split(":")[0]),
                                 Long.parseLong(message.split(":")[1]));
-                        // System.out.println(weatherStation.minMaxInfo());
                         printMenu();
                     } else if (!message.equals("")) {
                         System.out.println(message);

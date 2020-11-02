@@ -28,7 +28,7 @@ public class TCPClient extends TCPPort {
                                         WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT
                                 );
         } catch (IOException ex) {
-            throw new TCPException("------------ conenction failed; could not connect to a sensor ------");
+            throw new TCPException("------------ connection failed; could not connect to a sensor ------");
         } catch (Exception e) {
             throw new TCPException("TCP: Connect failed - other exception");
         }

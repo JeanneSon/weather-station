@@ -62,7 +62,7 @@ public class TCPPort {
      * given socket awaits a message from peer socket
      * @param socket
      * @param BUFFER_SIZE
-     * @return received message or 
+     * @return received message or empty string
      * @throws TCPException
      */
     public static String awaitMessage(Socket socket, int BUFFER_SIZE) throws TCPException {
@@ -70,7 +70,7 @@ public class TCPPort {
         try {
 
             try {
-                Thread.sleep(4000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 System.out.println(e);
             }
@@ -81,7 +81,6 @@ public class TCPPort {
             byte[] requestPDU = new byte[BUFFER_SIZE];
             InputStream connectionEndPointIn = socket.getInputStream(); // throws IOException
             int bytesRead = connectionEndPointIn.read(requestPDU); // throws IOException
-
             if (bytesRead > BUFFER_SIZE) {
                 // this should not happen
                 throw new TCPException("--------reception failed since buffer too small----------");
@@ -99,6 +98,7 @@ public class TCPPort {
             if (e.getMessage().equals("Socket closed")) {
                 System.out.println("---------------- the socket is now closed -------------");
             } else if (e.getMessage().equals("Connection reset")) {
+                System.out.println("---- connection reset ---");
                 closeSocket(socket);
             }
             else {

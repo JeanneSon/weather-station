@@ -1,4 +1,3 @@
-
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,6 +20,7 @@ public class SensorApplication {
     private static final String INFO_COMMAND = "INFO";
     private static final String DATA_COMMAND_REGEX = "DATA [0-9]+";
     private static final String DATA_STOP_COMMAND = "DATA STOP";
+    private static final String STOP_SENSOR_REQUEST = "STOP REQUEST";
     private static final String EXIT_DIALOG_COMMAND = "EXIT";
 
     private static Sensor sensor;
@@ -34,7 +34,6 @@ public class SensorApplication {
 
     public static void main(String[] args) {
 
-        
         sensorRunning = false;
         String input = "";
         while (!input.equals(EXIT_DIALOG_COMMAND)) {
@@ -52,7 +51,6 @@ public class SensorApplication {
                     server = new TCPServer();
                     System.out.println("waiting for a weather station to connect...");
                     server.awaitConnection();
-                    // dataSenderThread.start();
                     awaitMessageThread = new AwaitMessageThread();
                     awaitMessageThread.start();
                 } catch (TCPPort.TCPException e) {
@@ -77,6 +75,7 @@ public class SensorApplication {
         // or interrupt both threads!
         stopSensorApplication();
         sc.close();
+        System.out.println("exiting...");
         System.exit(0);
     }
 
@@ -92,8 +91,10 @@ public class SensorApplication {
             }
             sensorRunning = false;
             sensor = null;
-            server.closeAll();
-            server = null;
+            if (server != null) {
+                server.closeAll();
+                server = null;
+            }
             System.out.println("stopping sensor...");
 
             // give time to stop and close server and sensor
@@ -109,8 +110,7 @@ public class SensorApplication {
 
     static class AwaitMessageThread extends Thread {
 
-        public AtomicBoolean running = new AtomicBoolean(true);
-        public volatile boolean exit = false;
+        private final AtomicBoolean running = new AtomicBoolean(true);
         public long delay = 100;
 
         public void kill() {
@@ -131,7 +131,12 @@ public class SensorApplication {
                     break;
                 }
                 if (server.getConnectionEndPoint().isClosed()) {
-                    System.out.println("-------- connection does not exist; please stop the sensor ---------");
+                    System.out.println("----- no weatherstation connected\nstop the sensor");
+                    System.out.println("-------- connection does not exist\n"
+                            + "\t-> please stop the sensor (\""
+                            + STOP_SENSOR_COMMAND + "\") ---------\n"
+                            + "\t-> or stop the whole sensor application (\""
+                            + EXIT_DIALOG_COMMAND + "\") ---------");
                     break;
                 }
                 try {
@@ -140,7 +145,6 @@ public class SensorApplication {
                         server.sendMessage(sensor.info());
 
                     } else if (message.matches(DATA_COMMAND_REGEX)) {
-                        // interruptAndRemoveThread(dataSenderThread);
                         if (dataSenderThread != null) {
                             dataSenderThread.kill();
                         }
@@ -157,6 +161,25 @@ public class SensorApplication {
                         }
 
                         // interruptAndRemoveThread(dataSenderThread);
+                    } else if (message.equals(STOP_SENSOR_REQUEST)) {
+                        if (dataSenderThread != null) {
+                            dataSenderThread.kill();
+                            dataSenderThread = null;
+                        }
+                        sensorRunning = false;
+                        sensor = null;
+                        if (server != null) {
+                            try {
+                                server.closeAll();
+                            } catch (TCPPort.TCPException e) {
+                                System.out.println("--- failed to shutdown server correctly ---");
+                            }
+                            server = null;
+                        }
+                        System.out.println("stopping sensor...");
+                        printMenu();
+                        break;
+                        // stopSensorApplication();
                     }
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
