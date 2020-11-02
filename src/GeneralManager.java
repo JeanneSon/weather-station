@@ -2,15 +2,23 @@
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * This class contains useful functions that do not belong to 
+ * a particular part of the program
+ * @author J.Krug, H.Schall
+ */
 public class GeneralManager {
 
+    /**
+     * The constructor is set to private as no object of this class should be instantiated.
+     */
     private GeneralManager() {
     }
 
     /**
-     *
-     * @param s
-     * @return long if valid and -1 if invalid
+     * checks whether the string is a long
+     * @param s the string
+     * @return true if long, else false
      */
     public static boolean isLong(String s) {
         try {
@@ -21,6 +29,11 @@ public class GeneralManager {
         }
     }
 
+    /**
+     * checks whether the string is a double
+     * @param s the string
+     * @return true if double, else false
+     */
     public static boolean isDouble(String s) {
         try {
             Double.parseDouble(s);
@@ -30,6 +43,11 @@ public class GeneralManager {
         }
     }
 
+    /**
+     * checks if format "A:B" containing A (double) and B (long) is correct
+     * @param s format
+     * @return is correct
+     */
     public static boolean isDoubleAndLong(String s) {
         try {
             Double.parseDouble(s.split(":")[0]);
@@ -40,6 +58,12 @@ public class GeneralManager {
         }
     }
 
+    /**
+     * rounds a double value
+     * @param value double value
+     * @param places degree of accuracy
+     * @return rounded value
+     */
     public static double round(double value, int places) {
         if (places < 0) {
             throw new IllegalArgumentException();
@@ -50,6 +74,12 @@ public class GeneralManager {
         return bd.doubleValue();
     }
 
+    /**
+     * converts a time in milliseconds (UTC timestamp) to a more readable
+     * string containing hour, minute and second
+     * @param timeInMillis time in milliseconds 
+     * @return readable string of format "hh:mm:ss"
+     */
     public static String timeInMillisToDate(long timeInMillis) {
         long second = (timeInMillis / 1000) % 60;
         long minute = (timeInMillis / (1000 * 60)) % 60;
