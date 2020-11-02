@@ -1,80 +1,94 @@
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
- *
- * @author j
+ * This class manages the server.
+ * @author J.Krug, H.Schall
  */
-
-// extract code snippets they have in common
-
 public class TCPServer extends TCPPort {
 
     public static ServerSocket serviceAccessPoint;
     public static final int SERVER_PORT = 10001;
     private static Socket connectionEndPoint;
     private static final int BUFFER_SIZE = 1024;
-    //private static final int WAIT_FOR_MESSAGE_TIME_MILLI_SEC = 4000;
-
+    
+    /**
+     * create a server socket, bound to the server port
+     * first step of a TCP connection
+     * @throws TCPException
+     */
+    public TCPServer() throws TCPException {
+        try {
+            serviceAccessPoint = new ServerSocket(SERVER_PORT);
+        } catch (IOException ex) {            
+            throw new TCPException("--------- starting server failed ---------");
+        }
+    }
+    
+    /**
+     * get connectionEndPoint
+     * @return connectionEndPoint
+     */
     public Socket getConnectionEndPoint() {
         return connectionEndPoint;
     }
 
-    // create ServerSocket
-    public TCPServer() throws TCPException {
-        // 1. create a server socket, bound to the server port.
-        try {
-            serviceAccessPoint = new ServerSocket(SERVER_PORT);
-
-        } catch (IOException ex) {
-
-
-//when does new ServerSocket throw IOException?
-
-            throw new TCPException("starting server failed");
-        }
-    }
-
+    /**
+     * sends a message
+     * @param responseMessage the message to be send
+     * @throws TCPException if sending failed
+     */
     public void sendMessage(String responseMessage) throws TCPException {
-        System.out.println("I send .. " + responseMessage);
-        TCPPort.sendMessage(TCPServer.connectionEndPoint, responseMessage);
+        TCPPort.sendMessage(connectionEndPoint, responseMessage);
     }
 
-    public String awaitConnection() throws TCPException {
+    /**
+     * waits for connection and accepts it
+     * @return feedback
+     * @throws TCPException
+     */
+    public String awaitConnection() throws TCPException {   
+        String toReturn = "Server running on port " + serviceAccessPoint.getLocalPort();
         try {
-            String toReturn = "Server running on port " + serviceAccessPoint.getLocalPort();
-
-            // Listen for a connection to be made to this socket and accept it
-            // wait for connection request
             connectionEndPoint = serviceAccessPoint.accept();
             return toReturn + "\nconnection establishment with " + connectionEndPoint.getInetAddress().getHostAddress()
                     + ":" + connectionEndPoint.getPort();
-
         } catch (IOException e) {
-            throw new TCPException("waiting failed");
+            throw new TCPException(toReturn + " but waiting failed");
         }
     }
 
+    /**
+     * awaits a message from peer socket
+     * @return message
+     * @throws TCPException
+     */
     public String awaitMessage() throws TCPException {
         return TCPPort.awaitMessage(TCPServer.connectionEndPoint, BUFFER_SIZE);
     }
 
+    /**
+     * close all sockets on server side
+     * @throws TCPException if closing failed
+     */
     public void closeAll() throws TCPException {
         closeSocket(connectionEndPoint);
         closeServerSocket();
     }
 
+    /**
+     * close the current socket connected to the client
+     * @throws TCPException
+     */
     public void closeCurrentSocket() throws TCPException {
         closeSocket(connectionEndPoint);
     }
 
+    /**
+     * close the ServerSocket connectionEndPoint
+     * @throws TCPException
+     */
     public void closeServerSocket() throws TCPException {
         try {
             serviceAccessPoint.close();
