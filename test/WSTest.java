@@ -146,7 +146,7 @@ class WSTest {
 	@ValueSource(doubles = { 0.0, 1.0, 2.0, 3.0, 4.0, Double.MAX_VALUE })
 	void testGetMaxTemp0(double arg) throws Exception {
 
-		double[] dummyValues = { -0.0, -1.0, -2.0, -3.0, -4.0, -Double.MAX_VALUE };
+		double[] dummyValues = { 0.0, -1.0, -2.0, -3.0, -4.0, -Double.MAX_VALUE };
 		for (double d : dummyValues) {
 			ws.setCurrentTemp(d, 0);
 		}
