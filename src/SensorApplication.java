@@ -1,14 +1,11 @@
+
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
+ * This class manages the Dialog/SensorApplication
  *
- * @author j
+ * @author J.Krug, H.Schall
  */
 public class SensorApplication {
 
@@ -17,10 +14,6 @@ public class SensorApplication {
     private static final String START_SENSOR_COMMAND_REGEX = "START [\\wäöüÄÖÜß]+";
     private static final String START_SENSOR_COMMAND = "START";
     private static final String STOP_SENSOR_COMMAND = "STOP";
-    private static final String INFO_COMMAND = "INFO";
-    private static final String DATA_COMMAND_REGEX = "DATA [0-9]+";
-    private static final String DATA_STOP_COMMAND = "DATA STOP";
-    private static final String STOP_SENSOR_REQUEST = "STOP REQUEST";
     private static final String EXIT_DIALOG_COMMAND = "EXIT";
 
     private static Sensor sensor;
@@ -41,11 +34,14 @@ public class SensorApplication {
             sensorRunning = (sensor != null);
 
             printMenu();
-            input = sc.nextLine().toUpperCase();
+            // awaiting user input
+            input = sc.nextLine().trim();
 
             if (input.matches(START_SENSOR_COMMAND_REGEX) && !sensorRunning) {
+                // dividing command into START and <location>
                 String location = input.split(" ", 2)[1];
                 System.out.println("starting a Sensor " + location);
+                // creating a new Sensor, new TCPServer and starting an awaitMessageThread
                 sensor = new Sensor(1, 1, location);
                 try {
                     server = new TCPServer();
@@ -57,10 +53,7 @@ public class SensorApplication {
                     System.out.println(e.getMessage());
                 }
 
-            }
-
-            // server.sendMessage(input);
-            else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
+            } else if (input.equals(STOP_SENSOR_COMMAND) && sensorRunning) {
                 stopSensorApplication();
             } else if (!input.equals(EXIT_DIALOG_COMMAND)) {
                 System.out.println("Invalid input!");
@@ -72,13 +65,17 @@ public class SensorApplication {
                 }
             }
         }
-        // or interrupt both threads!
+
         stopSensorApplication();
         sc.close();
         System.out.println("exiting...");
         System.exit(0);
     }
 
+    /**
+     * Stopping all instances of: - Sensor - TCPServer - DataSenderThread -
+     * AwaitMessageThread
+     */
     private static void stopSensorApplication() {
         try {
             if (dataSenderThread != null) {
@@ -110,10 +107,14 @@ public class SensorApplication {
 
     static class AwaitMessageThread extends Thread {
 
+        // multiple Threads can modify running so it needs to be atomic to ensure clean/predictable field modifications
         private final AtomicBoolean running = new AtomicBoolean(true);
-        public long delay = 100;
 
+        /**
+         * killing current instance of this Thread
+         */
         public void kill() {
+            // since there is no Thread.sleep() in run(), the Thread will run out if running is set to false
             this.running.set(false);
             try {
                 this.join();
@@ -122,6 +123,10 @@ public class SensorApplication {
             }
         }
 
+        /**
+         * Is constantly listening for new message received by the server
+         */
+        @Override
         public void run() {
 
             while (running.get()) {
@@ -135,33 +140,34 @@ public class SensorApplication {
                     System.out.println("-------- connection does not exist\n"
                             + "\t-> please stop the sensor (\""
                             + STOP_SENSOR_COMMAND + "\") ---------\n"
-                            + "\t-> or stop the whole sensor application (\""
+                            + "\t-> or exit the whole sensor application (\""
                             + EXIT_DIALOG_COMMAND + "\") ---------");
                     break;
                 }
                 try {
                     String message = server.awaitMessage();
-                    if (message.equals(INFO_COMMAND)) {
+                    if (message.equals(GlobalCommands.INFO_COMMAND)) {
                         server.sendMessage(sensor.info());
 
-                    } else if (message.matches(DATA_COMMAND_REGEX)) {
+                    } else if (message.matches(GlobalCommands.DATA_COMMAND_REGEX)) {
                         if (dataSenderThread != null) {
                             dataSenderThread.kill();
                         }
-                        long delay = 1000 * Long.parseLong(message.split(" ", 2)[1]);
-                        dataSenderThread = new DataSenderThread(delay);
+                        // dividing command into DATA and the delay
+                        // converting delay from s to ms
+                        long delayCommand = 1000 * Long.parseLong(message.split(" ", 2)[1]);
+                        dataSenderThread = new DataSenderThread(delayCommand);
                         dataSenderThread.start();
 
-                    } else if (message.equals(DATA_STOP_COMMAND)) {
-
-                        // running
+                    } else if (message.equals(GlobalCommands.DATA_STOP_COMMAND)) {
+                        // Stopping DataSenderThread if running
                         if (dataSenderThread != null) {
                             dataSenderThread.kill();
                             dataSenderThread = null;
                         }
 
-                        // interruptAndRemoveThread(dataSenderThread);
-                    } else if (message.equals(STOP_SENSOR_REQUEST)) {
+                    } else if (message.equals(GlobalCommands.STOP_SENSOR_REQUEST)) {
+                        // Stopping entire SensorApplication
                         if (dataSenderThread != null) {
                             dataSenderThread.kill();
                             dataSenderThread = null;
@@ -179,7 +185,7 @@ public class SensorApplication {
                         System.out.println("stopping sensor...");
                         printMenu();
                         break;
-                        // stopSensorApplication();
+
                     }
                 } catch (TCPPort.TCPException e) {
                     System.out.println(e.getMessage());
@@ -192,14 +198,20 @@ public class SensorApplication {
 
     static class DataSenderThread extends Thread {
 
-        private AtomicBoolean running = new AtomicBoolean(true);
+        // multiple Threads can modify running so it needs to be atomic to ensure clean/predictable field modifications
+        private final AtomicBoolean running = new AtomicBoolean(true);
         private final long delay;
 
         public DataSenderThread(long delay) {
             this.delay = delay;
         }
 
+        /**
+         * killing current instance of this Thread
+         */
         public void kill() {
+            // since there is a Thread.sleep() in run(), the Thread could remain in it if running is set to false
+            // the Thread must be interrupted
             this.running.set(false);
             this.interrupt();
             try {
@@ -209,6 +221,11 @@ public class SensorApplication {
             }
         }
 
+        /**
+         * Is constantly sending new message containing the current messured
+         * temperature
+         */
+        @Override
         public void run() {
             while (running.get()) {
                 try {
@@ -228,19 +245,21 @@ public class SensorApplication {
         }
     }
 
+    /**
+     * prints the SensorApplication menu on the console
+     */
     static void printMenu() {
-        System.out.println("\n\n\n\n\n\n\n\n");
-        System.out.println("SENSORAPPLICATION:");
-        System.out.println("SENSOR:");
+        StringBuilder menu = new StringBuilder();
+        menu.append("\nSENSORAPPLICATION:\nSENSOR:\n");
+        menu.append("_______________________________________________\nMENU:\n");
         if (!sensorRunning) {
-            System.out.println("- Type \"" + START_SENSOR_COMMAND + " <locationname>\" to start the sensor");
+            menu.append("- Type \"" + START_SENSOR_COMMAND + " <locationname>\" to start the sensor\n");
         }
         if (sensorRunning) {
-            System.out.println("- Type \"" + STOP_SENSOR_COMMAND + "\" to stop the sensor");
+            menu.append("- Type \"" + STOP_SENSOR_COMMAND + "\" to stop the sensor\n");
         }
-        System.out.println("- Type \"" + EXIT_DIALOG_COMMAND + "\" to close this menu");
-        System.out.println("_______________________________________________");
-
-        System.out.println("Input: ");
+        menu.append("- Type \"" + EXIT_DIALOG_COMMAND + "\" to close this menu\n");
+        menu.append("_______________________________________________\n" + "Input: ");
+        System.out.println(menu.toString());
     }
 }

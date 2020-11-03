@@ -1,6 +1,11 @@
 
 import java.util.Random;
 
+/**
+ * This class manages the Sensor
+ *
+ * @author J.Krug, H.Schall
+ */
 public final class Sensor {
 
     // attributes are final as they can only be set once when the Sensor is instanciated
@@ -30,7 +35,7 @@ public final class Sensor {
      * @return attributs as String
      */
     public String info() {
-        return "ProductId: " + this.PRODUCT_ID + ", VendorId: " + this.VENDOR_ID + ", Location " + this.location;
+        return "ProductId: " + this.PRODUCT_ID + ", VendorId: " + this.VENDOR_ID + ", Location: " + this.location;
     }
 
     /**

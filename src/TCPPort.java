@@ -1,3 +1,4 @@
+
 import java.net.Socket;
 import java.net.SocketException;
 import java.io.OutputStream;
@@ -6,37 +7,25 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 /**
- * This class contains the methods used by both classes - TCPServer and TCPClient
+ * This class contains the methods used by both classes - TCPServer and
+ * TCPClient
+ *
  * @author J.Krug, H.Schall
  */
 public class TCPPort {
 
     /**
-     * prevent instantiation -> declare the constructor 
-     * of the parent class as protected
-     * That way, it will not be visible to outside classes other than the ones which extend it.
+     * prevent instantiation -> declare the constructor of the parent class as
+     * protected That way, it will not be visible to outside classes other than
+     * the ones which extend it.
      * (https://softwareengineering.stackexchange.com/questions/271410/should-abstract-classes-be-used-to-prevent-instantiation)
      */
-    protected TCPPort() {}
-
-    public static class TCPException extends Exception {
-
-        /**
-         * Exceptions should always be serializale --> serialVersionUID
-         */
-        private static final long serialVersionUID = 1L;
-
-        public TCPException() {
-            super();    
-        }
-    
-        public TCPException(String msg) {
-            super(msg);
-        }
+    protected TCPPort() {
     }
 
     /**
      * sends the given string via TCP over the given socket
+     *
      * @param connectionEndPoint the given socket
      * @param responseMessage the given string
      * @throws TCPException if sending failed
@@ -44,8 +33,8 @@ public class TCPPort {
     public static void sendMessage(Socket connectionEndPoint, String responseMessage) throws TCPException {
         try {
             // serialize data
-            //throws UnsupportedEncodingException (is caught by catching IOException)
-            byte[] responsePDU = responseMessage.getBytes(); 
+            // throws UnsupportedEncodingException (is caught by catching IOException)
+            byte[] responsePDU = responseMessage.getBytes();
 
             OutputStream connectionEndPointOut = connectionEndPoint.getOutputStream(); //throws IOException
 
@@ -60,6 +49,7 @@ public class TCPPort {
 
     /**
      * given socket awaits a message from peer socket
+     *
      * @param socket
      * @param BUFFER_SIZE
      * @return received message or empty string
@@ -90,7 +80,7 @@ public class TCPPort {
                 socket.close(); // throws IOException
                 throw new TCPException("----- closing the socket in reaction to closed peer socket ----");
             }
-            
+
             // deserialize and return request
             return new String(requestPDU).trim();
 
@@ -100,21 +90,22 @@ public class TCPPort {
             } else if (e.getMessage().equals("Connection reset")) {
                 System.out.println("---- connection reset ---");
                 closeSocket(socket);
-            }
-            else {
+            } else {
                 throw new TCPException(e.getMessage());
             }
         } catch (UnknownHostException e) {
             throw new TCPException("host unknown");
         } catch (IOException e) {
-            if (!e.getMessage().equals("Read timed out"))
+            if (!e.getMessage().equals("Read timed out")) {
                 throw new TCPException(e.getMessage());
+            }
         }
         return "";
     }
 
     /**
      * close a socket
+     *
      * @param socket
      * @throws TCPPort.TCPException if closing failed
      */
@@ -123,6 +114,17 @@ public class TCPPort {
             socket.close();
         } catch (IOException e) {
             throw new TCPException("closing failed");
+        }
+    }
+
+    public static class TCPException extends Exception {
+
+        public TCPException() {
+            super();
+        }
+
+        public TCPException(String msg) {
+            super(msg);
         }
     }
 }

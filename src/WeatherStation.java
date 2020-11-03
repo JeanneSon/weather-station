@@ -1,4 +1,9 @@
 
+/**
+ * This class manages the WeatherStation
+ *
+ * @author J.Krug, H.Schall
+ */
 public class WeatherStation {
 
     private double minTemp;
@@ -6,22 +11,6 @@ public class WeatherStation {
     private double currentTemp;
     private long currentTempTime;
     private boolean measuredOneValid;
-
-    public static class WeatherStationException extends Exception {
-
-        /**
-         * Exceptions should always be serializale --> serialVersionUID
-         */
-        private static final long serialVersionUID = 1L;
-
-        public WeatherStationException() {
-            super();    
-        }
-    
-        public WeatherStationException(String msg) {
-            super(msg);
-        }
-    }
 
     public WeatherStation() {
         reset();
@@ -48,50 +37,52 @@ public class WeatherStation {
     }
 
     /**
-     * @throws Exception
      * @return currentTemp
      * @throws WeatherStation.WeatherStationException
      */
     public double getCurrentTemp() throws WeatherStationException {
-        if (measuredOneValid)
-        //throw exception if not measured -> weatherstation exception
+        if (measuredOneValid) //throw exception if not measured -> weatherstation exception
+        {
             return currentTemp;
-        else
+        } else {
             throw new WeatherStationException("No value measured until now.");
+        }
     }
 
     /**
-     * @throws Exception
      * @return currentTempTime
      * @throws WeatherStation.WeatherStationException
      */
     public long getCurrentTempTime() throws WeatherStationException {
-        if (measuredOneValid)
+        if (measuredOneValid) {
             return currentTempTime;
-        else
+        } else {
             throw new WeatherStationException("No value measured until now.");
+        }
     }
 
     /**
-     * @throws Exception
+     * @throws WeatherStation.WeatherStationException
      * @return minTemp
      */
     public double getMinTemp() throws WeatherStationException {
-        if (measuredOneValid)
+        if (measuredOneValid) {
             return minTemp;
-        else
+        } else {
             throw new WeatherStationException("No value measured until now.");
+        }
     }
 
     /**
-     * @throws Exception
+     * @throws WeatherStation.WeatherStationException
      * @return maxTemp
      */
     public double getMaxTemp() throws WeatherStationException {
-        if (measuredOneValid)
+        if (measuredOneValid) {
             return maxTemp;
-        else
+        } else {
             throw new WeatherStationException("No value measured until now.");
+        }
     }
 
     /**
@@ -111,7 +102,7 @@ public class WeatherStation {
      * Sets currentTemp, currentTempTime, minTemp, maxTemp, measuredOneValid to
      * default values
      */
-    public void reset() {
+    public final void reset() {
         currentTemp = Double.NaN;
         currentTempTime = 0L;
         minTemp = Double.MAX_VALUE;
@@ -119,4 +110,14 @@ public class WeatherStation {
         measuredOneValid = false;
     }
 
+    public static class WeatherStationException extends Exception {
+
+        public WeatherStationException() {
+            super();
+        }
+
+        public WeatherStationException(String msg) {
+            super(msg);
+        }
+    }
 }

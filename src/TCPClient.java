@@ -1,10 +1,11 @@
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-
 /**
- * This class manages the client.
+ * This class manages the client
+ *
  * @author J.Krug, H.Schall
  */
 public class TCPClient extends TCPPort {
@@ -18,15 +19,16 @@ public class TCPClient extends TCPPort {
 
     /**
      * create a stream socket and connect it to the server socket
+     *
      * @throws TCPException
      */
     public TCPClient() throws TCPException {
         try {
             serviceAccessPoint = new Socket();
             serviceAccessPoint.connect(
-                                        new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID), 
-                                        WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT
-                                );
+                    new InetSocketAddress(SERVER_NAME, DESTINATION_PORT_ID),
+                    WAIT_TIME_FOR_CONNECTION_ESTABLISHMENT
+            );
         } catch (IOException ex) {
             throw new TCPException("------------ connection failed; could not connect to a sensor ------");
         } catch (Exception e) {
@@ -36,6 +38,7 @@ public class TCPClient extends TCPPort {
 
     /**
      * sends a message
+     *
      * @param responseMessage the message to be send
      * @throws TCPException if sending failed
      */
@@ -43,9 +46,9 @@ public class TCPClient extends TCPPort {
         sendMessage(TCPClient.serviceAccessPoint, responseMessage);
     }
 
-    
     /**
      * awaits a message from peer socket
+     *
      * @return message
      * @throws TCPException
      */
@@ -55,14 +58,16 @@ public class TCPClient extends TCPPort {
 
     /**
      * close the socket connected to the server
+     *
      * @throws TCPException
      */
-    public void closeSocket() throws TCPException{
-        closeSocket(serviceAccessPoint);   
+    public void closeSocket() throws TCPException {
+        closeSocket(serviceAccessPoint);
     }
 
     /**
      * check if server is inactive
+     *
      * @return true if socket on server side is closed , else false
      */
     public boolean serverIsInactive() {
