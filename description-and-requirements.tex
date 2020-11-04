@@ -108,7 +108,7 @@ Hier nun zusammenfassend einige Worte dazu:
     \item Eine Wetterstation kann sich mit einem Sensor verbinden und dessen Dienste anfordern. Der Benutzer kann sich das Minimum und
             Maximum der übermittelten Temperaturen des aktuellen Zeitraums anzeigen lassen. Der Zeitraum kann resetted werden.
     \item Die Dienste des Sensors umfassen INFO (Senden der drei oben genannten Informationen über den Sensor), DATA (periodisches 
-            Übermitteln von akutueller Temperatur inklusive Uhrzeit) und STOP (Stoppen der periodischen Übermittlung).
+            Übermitteln von aktueller Temperatur inklusive Uhrzeit) und STOP (Stoppen der periodischen Übermittlung).
     \item Sowohl die Sensor-Applikation als auch die Wetterstation-Applikation werden über die Konsole gestartet und gestoppt.
 \end{itemize}
 \section{Ausgangszustand (Ist-Zustand)}
@@ -160,28 +160,31 @@ Die funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstat
 \begin{description}
     \item[FR1] Der Sensor bietet einen Info-Dienst, der das Senden von Produkt Id, Vendor Id und Standort beinhaltet, an.
     \item[FR2] Der Sensor bietet einen Data-Dienst, der periodisch Zeit und aktuelle Temperatur an die Wetterstation schickt, an.
-    \item[FR3] Die Zeitangabe gibt Datum und exakte Uhrzeit (inklusive Sekunden) an.
-    \item[FR3] Der Benutzer kann den Data-Dienst aktivieren und die Messfrequenz angeben.
-    \item[FR4] Eine Messfrequenz wird in Sekunden angegeben und muss mindestens 1 Sekunde betragen, hat aber keine Obergrenze.  
-    \item[FR5] Der Sensor bietet einen Stop-Dienst, der das periodische Senden beendet, an.
-    \item[FR6] Der Admin muss den Sensor über die Konsole starten.
-    \item[FR7] Der Admin muss den Standort des Sensors über die Konsole eingeben.  
-    \item[FR8] Wetterstation und Sensor können miteinander kommunizieren (Datenaustausch).  
+    \item[FR3] Die Zeit wird in Millisekunden seit dem 01.01.1970 0:00 Uhr übermittelt.
+    \item[FR4] Der Benutzer kann den Data-Dienst aktivieren und die Messfrequenz angeben.
+    \item[FR5] Eine Messfrequenz wird in Sekunden angegeben und muss mindestens 3 Sekunden betragen, hat aber keine Obergrenze.  
+    \item[FR6] Der Sensor bietet einen Stop-Dienst, der das periodische Senden beendet, an.
+    \item[FR7] Der Admin muss den Sensor über die Konsole starten.
+    \item[FR8] Der Admin muss den Sensor über die Konsole stoppen.
+    \item[FR9] Der Admin muss den Standort des Sensors über die Konsole eingeben.  
+    \item[FR10] Wetterstation und Sensor können miteinander kommunizieren (Datenaustausch).  
 \end{description}
 
 \subsection{Wetterstation}
 \begin{description}
-    \item[FR9] Der Admin kann die Wetterstation über die Konsole starten.
-    \item[FR10] Die Wetterstation hat eine MinMax-Funktion, die das Minimum und das Maximum der Temperatur eines Zeitraums angibt.
-    \item[FR11] Der Zeitraum ist begrenzt durch den Start des Programms oder Reset von Minimum und Maximum und dem aktuellen Zeitpunkt.
-    \item[FR12] Der Benutzer kann die MinMax-Funktion der Wetterstation benutzen.
-    \item[FR13] Der Benutzer kann das Minimum und Maximum zurücksetzten (Reset).
-    \item[FR14] Die Wetterstation kann sämtliche Temperaturen anzeigen. 
+    \item[FR11] Der Admin kann die Wetterstation über die Konsole starten.
+    \item[FR12] Der Admin kann die Wetterstation über die Konsole stoppen.
+    \item[FR13] Die Wetterstation hat eine MinMax-Funktion, die das Minimum und das Maximum der Temperatur eines Zeitraums angibt.
+    \item[FR14] Der Zeitraum ist begrenzt durch den Start des Programms oder Reset von Minimum und Maximum und dem aktuellen Zeitpunkt.
+    \item[FR15] Der Benutzer kann die MinMax-Funktion der Wetterstation benutzen.
+    \item[FR16] Der Benutzer kann das Minimum und Maximum zurücksetzten (Reset).
+    \item[FR17] Die Wetterstation hat keinen definierten Wertebereich hinsichtlich der Temperaturanzeige. 
 \end{description}
 
 
 \section{Nicht-Funktionale Anforderungen (non-functional requirements)}
-Die nicht-funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstation}, \textit{Sensor} und \textit{Administrativ}.
+Die nicht-funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstation}, \textit{Sensor} 
+und \textit{Verschiedenes}.
 \subsection{Sensor}
 \begin{description}
     \item[NFR1] Der Sensor muss eine Produkt Id, eine Vendor Id und einen Standort haben.
@@ -196,7 +199,7 @@ Die nicht-funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wett
     \item[NFR6] Der Sensor muss durch Unit-Tests getestet werden.
 \end{description}
 
-\subsection{Administrativ}
+\subsection{Verschiedenes}
 \begin{description}
     \item[NFR7] Es muss ein UML-Klassendiagramm erstellt werden.
     \item[NFR8] Es muss eine Projektbeschreibung verfasst werden.
