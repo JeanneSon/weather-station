@@ -26,6 +26,8 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage[colorinlistoftodos]{todonotes}
+\usepackage{hyperref}
+
 
 \begin{document}
 
@@ -40,7 +42,7 @@
 %----------------------------------------------------------------------------------------
 
 %\textsc{\LARGE ISFATES - DFHI}\\[1.5cm] % Name of your university/college
-\includegraphics[scale=.6]{2844169_mxtuSNlblctu_0.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
+\includegraphics[scale=.6]{2849736_mi6uMyQoUAnr_0.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
 \textsc{\Large Informatique et ingénierie du web (L3)}\\[0.5cm] % Major heading such as course name
 \textsc{\large Perfectionnement en Java}\\[0.5cm] % Minor heading such as course title
 
@@ -58,7 +60,7 @@
 
 \begin{minipage}{0.4\textwidth}
 \begin{flushleft} \large
-%\emph{Author:}\\
+\emph{Eingereicht von:}\\
 Julian \textsc{Krug}\\ % Your name
 Hanna \textsc{Schall}\\ % Your name
 \end{flushleft}
@@ -73,7 +75,9 @@ Hanna \textsc{Schall}\\ % Your name
 %	DATE SECTION
 %----------------------------------------------------------------------------------------
 
-{\large Oktober 2020}\\[2cm] % Date, change the \today to a set date if you want to be precise
+{\large November 2020}\\[2cm] % Date, change the \today to a set date if you want to be precise
+{\large Design basierend auf einem LaTex-Template von WikiBooks, modifiziert von Elsa Slattegard 
+für Uppsala university \\(License: CC BY-NC-SA 3.0)}\\[1.8cm]
 
 \vfill % Fill the rest of the page with whitespace
 
@@ -81,6 +85,72 @@ Hanna \textsc{Schall}\\ % Your name
 
 
 \chapter{Projektbeschreibung}
+\section{Kurzbeschreibung}
+Resultat dieses Projets ist eine Java-Applikation, die im Wesentlichen aus einer Wetterstation und einem Sensor besteht.
+Die Wetterstation kann sich mit einem Sensor verbinden, Daten anfordern und diese ausgeben. Zudem wurde diese Projektbeschreibung 
+mit anschließender Anforderungsanalyse, Unit-Tests für die Wetterstation und ein UML-Klassendiagramm konzipiert.\\
+\section{Kontext / Hintergrund}
+Die Vorlesung \textit{Perfectionnement en Java} des Wintersemesters 2020, gehalten von Herrn Prof. Brocks, 
+vertieft das Verständnis von Software-Entwicklung, insbesondere in der Programmiersprache Java. \\
+Im September und Oktober wurden der Aufbau von UML-Klassendiagrammen, die Datenübertragung mittels UDP 
+und TCP, das Erstellen von Projektbeschreibungen und Anforderungsanalysen, Unit Tests, Test-Driven 
+Development und Nebenläufigkeit behandelt.\\
+Um die erlernten Elemente zusammenzuführen, wurde dieses Projekt realisiert. Es vereinigt in der Vorlesung gestellte
+Teilaufgaben wie die Kommunikation über TCP, inspiriert von der Logik eines klassischen Telefons, und das Erstellen
+eines Thermometers.\\
+\section{Aufgabenstellung}
+Die Details zur Aufgabenstellung wurden in einem \href{https://moodle.htwsaar.de/mod/resource/view.php?id=58719}{Word-Dokument
+im Moodle-Kurs} zur Vorlesung dargestellt.
+Hier nun zusammenfassend einige Worte dazu:
+\begin{itemize}
+    \item Ein Sensor verfügt über eine Vendor Id, eine Produkt Id und einen Standort, der zu Beginn definiert werden muss. Er misst 
+            Temperaturen im Bereich von -20 und 50°C. 
+    \item Eine Wetterstation kann sich mit einem Sensor verbinden und dessen Dienste anfordern. Der Benutzer kann sich das Minimum und
+            Maximum der übermittelten Temperaturen des aktuellen Zeitraums anzeigen lassen. Der Zeitraum kann resetted werden.
+    \item Die Dienste des Sensors umfassen INFO (Senden der drei oben genannten Informationen über den Sensor), DATA (periodisches 
+            Übermitteln von akutueller Temperatur inklusive Uhrzeit) und STOP (Stoppen der periodischen Übermittlung).
+    \item Sowohl die Sensor-Applikation als auch die Wetterstation-Applikation werden über die Konsole gestartet und gestoppt.
+\end{itemize}
+\section{Ausgangszustand (Ist-Zustand)}
+Die Umsetzung obiger Aufgabenstellung in Java-Code basiert auf den in der Vorlesung behandelten Implementierungen
+\begin{itemize}
+    \item eines Thermometers, dessen Messwerte über die Konsole eingegeben werden können und welches eine Min/Max-Funktion besitzt,
+    \item eines Telefons, dessen Benutzer über TCP \textit{hören} und \textit{in den Hörer sprechen} kann
+    \item und einer Konsolen-Applikation, anhand derer die Funktionsweise von Threads erläutert werden.
+\end{itemize}
+Zudem baut die Anforderungsanalyse (siehe unten) auf die während der Vorlesung in Kleingruppen angefertigte Analyse der 
+Projektanforderungen auf.
+\section{Anlass / Projektmotivation}
+Das vorliegende Projekt wurde aufgrund des Wunsches, die Vorlesungsinhalte in die Praxis umzusetzen und eine saubere Arbeit im
+Rahmen des \textit{Contrôle continue 1} abzuliefern, umgesetzt. Stakeholder sind in diesem Fall der korrigierende Professor, Herr Prof.
+Brocks, und die programmierenden Studierenden, Julian Krug und Hanna Schall. Zudem könnten eventuelle Benutzer der Applikation als
+weitere Interessensgruppe betrachtet werden.
+\section{Ziele (Soll-Zustand)}
+\textbf{Primäres Ziel} des Projekts ist das Funktionieren der Temperaturmessung des Sensors, der Datenübermittlung an die Wetterstation und
+die korrekte Implementierung der Min/Max- sowie der Reset-Funktion.\\
+\textbf{Speziell} in der hier dargestellten Lösung kann eine Wetterstation
+alle empfangenen Temperaturen darstellen, sofern sie im korrekten Format ankommen. Ein Sensor wird gestartet und wartet auf das
+Verbinden einer Wetterstation. Wird auch diese gestartet, verbindet sie sich automatisch mit dem Sensor, sofern dieser bereit ist.\\
+In der Wetterstation kann der Benutzer von verschiedenen Funktionen Gebrauch machen, die im Menü beschrieben sind.
+Wird das Übermittteln der aktuellen Temperatur (zufällig erzeugt) mit einer Periodizität von bspw. 5 Sekunden angefordert, 
+so aktualisiert die Wetterstation ihre Temperaturanzeige im 5-Sekunden-Takt.\\
+Der Benutzer kann die Wetterstation stoppen oder auch lediglich den Sensor bitten, das regelmäßige Senden der Temperatur (DATA STOP) zu
+unterbinden.
+\section{Rahmenbedingungen und Vorgaben}
+Das Projekt wurde in einer Zweiergruppe erstellt. Die ursprüngliche Abgabefrist war der 02.11.2020, die jedoch aufgrund der
+Nicht-Erreichbarkeit des Moodle-Servers auf den 05.11.2020 verschoben wurde.\\
+Da die direkte persönliche Zusammenarbeit durch die Corona-Pandemie nicht möglich war, fand die Realisierung des Projekts dank
+Besprechungen über Discord, Austauschen von Kurznachrichten über WhatsApp und Versionieren des Codes über GitHub statt.
+
+
+%Projekt
+%Aufgabenstellung
+%Ausgangszustand - ist-Zustand thermometer,tcp
+%Projektmotivation - in vorlseung, propfungleistug
+%Ziele - ziel ovm programm
+%Rahmenbedingungen - zeitraum, isfates, teams 
+
+
 \chapter{Anforderungsanalyse}
 Im Folgenden werden die Anforderungen an das Projekt analysiert.
 
@@ -88,11 +158,11 @@ Im Folgenden werden die Anforderungen an das Projekt analysiert.
 Die funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstation} und \textit{Sensor}.
 \subsection{Sensor}
 \begin{description}
-    \item[FR1] Der Sensor bietet einen Info-Dienst, der das Senden von ProductId, VendorId und Standort beinhaltet, an.
+    \item[FR1] Der Sensor bietet einen Info-Dienst, der das Senden von Produkt Id, Vendor Id und Standort beinhaltet, an.
     \item[FR2] Der Sensor bietet einen Data-Dienst, der periodisch Zeit und aktuelle Temperatur an die Wetterstation schickt, an.
     \item[FR3] Die Zeitangabe gibt Datum und exakte Uhrzeit (inklusive Sekunden) an.
     \item[FR3] Der Benutzer kann den Data-Dienst aktivieren und die Messfrequenz angeben.
-    \item[FR4] Eine Messfrequenz wird in Sekunden angegeben und kann zwischen 1 und 120 Sekunden liegen.  
+    \item[FR4] Eine Messfrequenz wird in Sekunden angegeben und muss mindestens 1 Sekunde betragen, hat aber keine Obergrenze.  
     \item[FR5] Der Sensor bietet einen Stop-Dienst, der das periodische Senden beendet, an.
     \item[FR6] Der Admin muss den Sensor über die Konsole starten.
     \item[FR7] Der Admin muss den Standort des Sensors über die Konsole eingeben.  
@@ -105,7 +175,8 @@ Die funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstat
     \item[FR10] Die Wetterstation hat eine MinMax-Funktion, die das Minimum und das Maximum der Temperatur eines Zeitraums angibt.
     \item[FR11] Der Zeitraum ist begrenzt durch den Start des Programms oder Reset von Minimum und Maximum und dem aktuellen Zeitpunkt.
     \item[FR12] Der Benutzer kann die MinMax-Funktion der Wetterstation benutzen.
-    \item[FR13] Der Benutzer kann das Minimum und Maximum zurücksetzten (Reset). 
+    \item[FR13] Der Benutzer kann das Minimum und Maximum zurücksetzten (Reset).
+    \item[FR14] Die Wetterstation kann sämtliche Temperaturen anzeigen. 
 \end{description}
 
 
@@ -113,7 +184,7 @@ Die funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstat
 Die nicht-funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wetterstation}, \textit{Sensor} und \textit{Administrativ}.
 \subsection{Sensor}
 \begin{description}
-    \item[NFR1] Der Sensor muss eine ProductId, eine VendorId und einen Standort haben.
+    \item[NFR1] Der Sensor muss eine Produkt Id, eine Vendor Id und einen Standort haben.
     \item[NFR2] Der Sensor kann im Bereich -20 bis 50°C  messen.
     \item[NFR3] Der Sensor muss durch Unit-Tests getestet werden.
 \end{description}
@@ -129,8 +200,12 @@ Die nicht-funktionalen Anforderungen sind gruppiert in die Bereiche \textit{Wett
 \begin{description}
     \item[NFR7] Es muss ein UML-Klassendiagramm erstellt werden.
     \item[NFR8] Es muss eine Projektbeschreibung verfasst werden.
-    \item[NFR9] Die Abgabefrist des Projekts ist am 02.11.2020 um 6 Uhr.
+    \item[NFR9] Die Abgabefrist des Projekts ist am 05.11.2020 um 6 Uhr.
     \item[NFR10] Die Programmiersprache ist Java.
     \item[NFR11] Das Programm muss auf einem durchschnittlichen PC (mind. 1 GB RAM) lauffähig sein. 
 \end{description}
+
+\chapter{UML-Klassendiagramm}
+\includegraphics[scale=.5]{2849736_mi6uMyQoUAnr_1.PNG}
+
 \end{document}
