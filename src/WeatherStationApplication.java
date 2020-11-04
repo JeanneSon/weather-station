@@ -193,7 +193,7 @@ public class WeatherStationApplication {
         if (weatherStationRunning && weatherStation.getMeasuredOneValid()) {
             try {
                 menu.append("Most recent transmitted temp: \t" + weatherStation.getCurrentTemp() + "°C at "
-                        + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()));
+                        + GeneralManager.timeInMillisToDate(weatherStation.getCurrentTempTime()) + "\n");
             } catch (WeatherStation.WeatherStationException e) {
                 menu.append("No valid value measured until now.\n");
             }
